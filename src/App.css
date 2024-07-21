@@ -19,7 +19,7 @@ form {
   flex-direction: column;
 }
 
-label {
+.field-block {
   margin-bottom: 15px;
 }
 
