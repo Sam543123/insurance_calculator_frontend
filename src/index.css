@@ -5,6 +5,10 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* background: linear-gradient(to bottom, #00BFFF, #00008B); */
+  /* Градиент от голубого (#00BFFF) к темно-синему (#00008B) */
+  /* background: #00BFFF; */
+  background: radial-gradient(circle, white, #00BFFF); /* Градиент от темно-синего (#00008B) к голубому (#00BFFF) */
 }
 
 code {
