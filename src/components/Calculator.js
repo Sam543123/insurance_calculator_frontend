@@ -3,19 +3,7 @@ import axios from "axios";
 import { API_URL } from "../constants.js"
 
 class Calculator extends React.Component {
-    state = {
-        insuranceType: 'чистое дожитие',
-        insurancePremiumFrequency: 'единовременно',
-        gender: 'мужской',
-        birthDate: '',
-        insuranceStartDate: '',
-        insuranceEndDate: '',
-        insurancePremiumRate: '',
-        insurancePremiumSupplement: '',
-        insurancePremium: '',
-        insuranceSum: '',
-        result: null
-    };
+    state = this.props.storedState;
 
     handleSubmit = (e) => {
         e.preventDefault();
@@ -32,15 +20,16 @@ class Calculator extends React.Component {
             insurancePremiumSupplement: this.state.insurancePremiumSupplement
         };
 
-        console.log(target);
-        if (target === "Страховой взнос") {
+        if (target === "insurancePremium") {
             requestData.insuranceSum = this.state.insuranceSum;
-        } else if (target === "Страховую сумму") {
+        } else if (target === "insuranceSum") {
             requestData.insurancePremium = this.state.insurancePremium;
         }
 
         axios.post(API_URL, requestData).then((response) => {
-            this.setState({ result: response.data.result })
+            let value = response.data.result;
+            this.setState({ result: value });
+            this.props.updateStoredState("result", value);
         });
     }
 
@@ -50,8 +39,9 @@ class Calculator extends React.Component {
         this.setState({
             [name]: value
         });
+        this.props.updateStoredState(name, value);
     };
-s
+
     render() {
         const { target } = this.props;
 
@@ -138,7 +128,7 @@ s
                             {targetDictionary[target].inputLabel}
                         </label>
                         <input type="text" name={targetDictionary[target].inputFieldName} value={targetDictionary[target].value} onChange={this.handleChange} />
-                    </div>                 
+                    </div>
                     <button type="submit">Вычислить</button>
                     {this.state.result && (
                         <div className="result-display">

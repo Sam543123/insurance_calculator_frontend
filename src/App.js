@@ -4,9 +4,34 @@ import Calculator from './components/Calculator.js';
 
 
 class App extends React.Component {
-  state = {
-    target: "insurancePremium",
-  };
+
+  constructor(props) {
+    super(props);
+    const baseCalculatorState = {
+      insuranceType: 'чистое дожитие',
+      insurancePremiumFrequency: 'единовременно',
+      gender: 'мужской',
+      birthDate: '',
+      insuranceStartDate: '',
+      insuranceEndDate: '',
+      insurancePremiumRate: '',
+      insurancePremiumSupplement: '',
+      insurancePremium: '',
+      insuranceSum: '',
+      result: null
+    }
+    this.state = {
+      target: "insurancePremium"
+    };
+    this.calculatorStoredState = {
+      insurancePremium: {
+        ...baseCalculatorState
+      },
+      insuranceSum: {
+        ...baseCalculatorState
+      }
+    }
+  }
 
   // TODO code duplication
   handleChange = (e) => {
@@ -16,8 +41,12 @@ class App extends React.Component {
     });
   };
 
+  updateCalculatorState = (name, value) => {
+    this.calculatorStoredState[this.state.target][name] = value;
+  }
+
   render() {
-    const targetsDictionary = {insurancePremium: "Страховой взнос", insuranceSum: "Страховую сумму"};
+    const targetsDictionary = { insurancePremium: "Страховой взнос", insuranceSum: "Страховую сумму" };
     return (
       <React.Fragment>
         <div className="choose-value-block">
@@ -32,7 +61,11 @@ class App extends React.Component {
             ))}
           </select>
         </div>
-        <Calculator target={this.state.target} />
+        {/* key field is necessary to rerender new component after changing target. */}
+        <Calculator key={this.state.target}
+          target={this.state.target}
+          storedState={this.calculatorStoredState[this.state.target]}
+          updateStoredState={this.updateCalculatorState} />
       </React.Fragment>
     );
   }
