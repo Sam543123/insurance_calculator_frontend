@@ -51,18 +51,18 @@ class Calculator extends React.Component {
             [name]: value
         });
     };
-
+s
     render() {
         const { target } = this.props;
 
         const targetDictionary = {
-            "Страховую сумму": {
+            "insuranceSum": {
                 inputFieldName: "insurancePremium",
                 inputLabel: "Введите страховой взнос:",
                 resultLabel: "Cтраховая сумма=",
                 value: this.state.insurancePremium
             },
-            "Страховой взнос": {
+            "insurancePremium": {
                 inputFieldName: "insuranceSum",
                 inputLabel: "Введите страховую сумму:",
                 resultLabel: "Cтраховой взнос=",
@@ -138,23 +138,7 @@ class Calculator extends React.Component {
                             {targetDictionary[target].inputLabel}
                         </label>
                         <input type="text" name={targetDictionary[target].inputFieldName} value={targetDictionary[target].value} onChange={this.handleChange} />
-                    </div>
-                    {/* {this.props.target === "Страховую сумму" && (
-                        <div className="field-block">
-                            <label>
-                                Введите страховой взнос:
-                            </label>
-                            <input type="text" name="insurancePremium" value={this.state.insurancePremium} onChange={this.handleChange} />
-                        </div>
-                    )}
-                    {this.props.target === "Страховой взнос" && (
-                        <div className="field-block">
-                            <label>
-                                Введите страховую сумму:
-                            </label>
-                            <input type="text" name="insuranceSum" value={this.state.insuranceSum} onChange={this.handleChange} />
-                        </div>
-                    )} */}
+                    </div>                 
                     <button type="submit">Вычислить</button>
                     {this.state.result && (
                         <div className="result-display">
