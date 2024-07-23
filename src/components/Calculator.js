@@ -2,31 +2,61 @@ import React from 'react';
 import axios from "axios";
 import { API_URL } from "../constants.js"
 
+function FiedlGroup({ labelText, children }) {
+    return (
+        <div className="field-block">
+            <label>
+                {labelText}
+            </label>
+            {children}
+        </div>
+    )
+}
+
 class Calculator extends React.Component {
     state = this.props.storedState;
 
     handleSubmit = (e) => {
         e.preventDefault();
         const { target } = this.props;
+        const routeDictionary = {
+            insurancePremium: "insurance_premium/",
+            insuranceSum: "insurance_sum/",
+            reserve: "reserve/",
+            tariffs: "tariffs/"
+        }
 
         let requestData = {
             insuranceType: this.state.insuranceType,
             insurancePremiumFrequency: this.state.insurancePremiumFrequency,
             gender: this.state.gender,
-            birthDate: this.state.birthDate,
-            insuranceStartDate: this.state.insuranceStartDate,
-            insuranceEndDate: this.state.insuranceEndDate,
             insurancePremiumRate: this.state.insurancePremiumRate,
-            insurancePremiumSupplement: this.state.insurancePremiumSupplement
+            insuranceLoading: this.state.insuranceLoading
         };
 
-        if (target === "insurancePremium") {
-            requestData.insuranceSum = this.state.insuranceSum;
-        } else if (target === "insuranceSum") {
-            requestData.insurancePremium = this.state.insurancePremium;
+        if (target !== "tariffs") {
+            requestData.birthDate = this.state.birthDate;
+            requestData.insuranceStartDate = this.state.insuranceStartDate;
+            requestData.insurancePeriod = 12 * Number(this.state.insurancePeriodYears) + Number(this.state.insurancePeriodMonths);
+            switch (target) {
+                case 'insurancePremium':
+                    requestData.insuranceSum = this.state.insuranceSum;
+                    break;
+                case 'insuranceSum':
+                    requestData.insurancePremium = this.state.insurancePremium;
+                    break;
+                // if target=reserve
+                default:
+                    requestData.insurancePremium = this.state.insurancePremium;
+                    requestData.reserveCalculationPeriod = 12 * Number(this.state.reservePeriodYears) + Number(this.state.reservePeriodMonths);
+            }
+        } else {
+            requestData.insuranceStartAge = this.state.insuranceStartAge;
+            requestData.insuranceEndAge = this.state.insuranceEndAge;
+            requestData.maximumInsurancePeriod = this.state.maximumInsurancePeriod;
         }
 
-        axios.post(API_URL, requestData).then((response) => {
+        axios.post(API_URL + routeDictionary[target], requestData).then((response) => {
             let value = response.data.result;
             this.setState({ result: value });
             this.props.updateStoredState("result", value);
@@ -46,93 +76,117 @@ class Calculator extends React.Component {
         const { target } = this.props;
 
         const targetDictionary = {
-            "insuranceSum": {
-                inputFieldName: "insurancePremium",
-                inputLabel: "Введите страховой взнос:",
-                resultLabel: "Cтраховая сумма=",
-                value: this.state.insurancePremium
-            },
-            "insurancePremium": {
-                inputFieldName: "insuranceSum",
-                inputLabel: "Введите страховую сумму:",
-                resultLabel: "Cтраховой взнос=",
-                value: this.state.insuranceSum
-            }
+            "insurancePremium": "Cтраховой взнос=",
+            "insuranceSum": "Cтраховая сумма=",
+            "reserve": "Резерв="
         }
 
         return (
             <div className="App">
                 <form onSubmit={this.handleSubmit}>
-                    <div className="field-block">
-                        <label>
-                            Выберите тип страхования:
-                        </label>
+                    <FiedlGroup labelText="Выберите тип страхования:">
                         <select name="insuranceType" value={this.state.insuranceType} onChange={this.handleChange}>
                             <option>чистое дожитие</option>
                             <option>страхование жизни на срок</option>
                             <option>чисто накопительное страхование</option>
                             <option>пожизненное страхование</option>
                         </select>
-                    </div>
-                    <div className="field-block">
-                        <label>
-                            Выберите вариант уплаты страхового взноса:
-                        </label>
+                    </FiedlGroup>
+                    <FiedlGroup labelText="Выберите вариант уплаты страхового взноса:">
                         <select name="insurancePremiumFrequency" value={this.state.insurancePremiumFrequency} onChange={this.handleChange}>
                             <option>единовременно</option>
                             <option>ежегодно</option>
                             <option>ежемесячно</option>
                         </select>
-                    </div>
-                    <div className="field-block">
-                        <label>
-                            Выберите пол застрахованного:
-                        </label>
+                    </FiedlGroup>
+                    <FiedlGroup labelText="Выберите пол застрахованного:">
                         <select name="gender" value={this.state.gender} onChange={this.handleChange}>
                             <option>мужской</option>
                             <option>женский</option>
                         </select>
-                    </div>
-                    <div className="field-block">
-                        <label>
-                            Введите дату рождения застрахованного:
-                        </label>
-                        <input type="date" name="birthDate" value={this.state.birthDate} onChange={this.handleChange} />
-                    </div>
-                    <div className="field-block">
-                        <label>
-                            Введите дату начала страхования:
-                        </label>
-                        <input type="date" name="insuranceStartDate" value={this.state.insuranceStartDate} onChange={this.handleChange} />
-                    </div>
-                    <div className="field-block">
-                        <label>
-                            Введите дату окончания страхования:
-                        </label>
-                        <input type="date" name="insuranceEndDate" value={this.state.insuranceEndDate} onChange={this.handleChange} />
-                    </div>
-                    <div className="field-block">
-                        <label>
-                            Введите доходность для страхового взноса:
-                        </label>
+                    </FiedlGroup>
+                    {target === "tariffs" && (
+                        <React.Fragment>
+                            <FiedlGroup labelText="Введите начальный возраст страхования в годах:">
+                                <input type="number" name="insuranceStartAge" value={this.state.insuranceStartAge} onChange={this.handleChange} />
+                            </FiedlGroup>
+                            <FiedlGroup labelText="Введите конечный возраст страхования в годах:">
+                                <input type="number" name="insuranceEndAge" value={this.state.insuranceEndAge} onChange={this.handleChange} />
+                            </FiedlGroup>
+                            <FiedlGroup labelText="Введите максимальный период страхования в годах:">
+                                <input type="number" name="maximumInsurancePeriod" value={this.state.maximumInsurancePeriod} onChange={this.handleChange} />
+                            </FiedlGroup>
+                        </React.Fragment>
+                    )}
+                    {target !== "tariffs" && (
+                        <React.Fragment>
+                            <FiedlGroup labelText="Введите дату рождения застрахованного:">
+                                <input type="date" name="birthDate" value={this.state.birthDate} onChange={this.handleChange} />
+                            </FiedlGroup>
+                            <FiedlGroup labelText="Введите дату начала страхования:">
+                                <input type="date" name="insuranceStartDate" value={this.state.insuranceStartDate} onChange={this.handleChange} />
+                            </FiedlGroup>
+                            <FiedlGroup labelText="Введите период страхования:">
+                                <div className="inputs-group">
+                                    <div>
+                                        <label className="period-fields-group">
+                                            лет
+                                        </label>
+                                        <input type="number" name="insurancePeriodYears" value={this.state.insurancePeriodYears} onChange={this.handleChange} />
+                                    </div>
+                                    <div className="period-fields-group">
+                                        <label>
+                                            месяцев
+                                        </label>
+                                        <input type="number" name="insurancePeriodMonths" value={this.state.insurancePeriodMonths} onChange={this.handleChange} />
+                                    </div>
+                                </div>
+                            </FiedlGroup>
+                        </React.Fragment>
+                    )}
+                    <FiedlGroup labelText="Введите доходность для страхового взноса:">
                         <input type="text" name="insurancePremiumRate" value={this.state.insurancePremiumRate} onChange={this.handleChange} />
-                    </div>
-                    <div className="field-block">
-                        <label>
-                            Введите нагрузку (от 0 до 1, не включая 1):
-                        </label>
-                        <input type="text" name="insurancePremiumSupplement" value={this.state.insurancePremiumSupplement} onChange={this.handleChange} />
-                    </div>
-                    <div className="field-block">
-                        <label>
-                            {targetDictionary[target].inputLabel}
-                        </label>
-                        <input type="text" name={targetDictionary[target].inputFieldName} value={targetDictionary[target].value} onChange={this.handleChange} />
-                    </div>
+                    </FiedlGroup>
+                    <FiedlGroup labelText="Введите нагрузку (от 0 до 1, не включая 1):">
+                        <input type="text" name="insuranceLoading" value={this.state.insuranceLoading} onChange={this.handleChange} />
+                    </FiedlGroup>
+                    {(target === "insuranceSum") && (
+                        <FiedlGroup labelText="Введите страховой взнос:">
+                            <input type="text" name="insurancePremium" value={this.state.insurancePremium} onChange={this.handleChange} />
+                        </FiedlGroup>
+                    )}
+                    {(target === "insurancePremium") && (
+                        <FiedlGroup labelText="Введите страховую сумму:">
+                            <input type="text" name="insuranceSum" value={this.state.insuranceSum} onChange={this.handleChange} />
+                        </FiedlGroup>
+                    )}
+                    {(target === "reserve") && (
+                        <React.Fragment>
+                            <FiedlGroup labelText="Введите страховой взнос:">
+                                <input type="text" name="insurancePremium" value={this.state.insurancePremium} onChange={this.handleChange} />
+                            </FiedlGroup>
+                            <FiedlGroup labelText="Введите время от начала страхования до расчёта резерва:">
+                                <div className="inputs-group">
+                                    <div>
+                                        <label className="period-fields-group">
+                                            лет
+                                        </label>
+                                        <input type="number" name="reservePeriodYears" value={this.state.reservePeriodYears} onChange={this.handleChange} />
+                                    </div>
+                                    <div className="period-fields-group">
+                                        <label>
+                                            месяцев
+                                        </label>
+                                        <input type="number" name="reservePeriodMonths" value={this.state.reservePeriodMonths} onChange={this.handleChange} />
+                                    </div>
+                                </div>
+                            </FiedlGroup>
+                        </React.Fragment>
+                    )}
                     <button type="submit">Вычислить</button>
-                    {this.state.result && (
+                    {(target !== "tariffs" && this.state.result) && (
                         <div className="result-display">
-                            {targetDictionary[target].resultLabel}{this.state.result}
+                            {targetDictionary[target]}{this.state.result}
                         </div>
                     )}
                 </form>

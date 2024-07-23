@@ -1,6 +1,6 @@
 import React from 'react';
 import './App.css';
-import Calculator from './components/Calculator.js';
+import BaseCalculator from './components/Calculator.js';
 
 
 class App extends React.Component {
@@ -11,13 +11,17 @@ class App extends React.Component {
       insuranceType: 'чистое дожитие',
       insurancePremiumFrequency: 'единовременно',
       gender: 'мужской',
+      insurancePremiumRate: '',
+      insuranceLoading: '',    
+      result: null
+    }
+
+    const intermediateCalculatorState = {
+      ...baseCalculatorState,
       birthDate: '',
       insuranceStartDate: '',
-      insuranceEndDate: '',
-      insurancePremiumRate: '',
-      insurancePremiumSupplement: '',
-      insurancePremium: '',
-      insuranceSum: '',
+      insurancePeriodYears: '',
+      insurancePeriodMonths: '',          
       result: null
     }
     this.state = {
@@ -25,9 +29,22 @@ class App extends React.Component {
     };
     this.calculatorStoredState = {
       insurancePremium: {
-        ...baseCalculatorState
+        insuranceSum: '',
+        ...intermediateCalculatorState
       },
       insuranceSum: {
+        insurancePremium: '',
+        ...intermediateCalculatorState
+      },
+      reserve: {
+        reservPeriodYears: '',
+        reservPeriodMonths: '',
+        ...intermediateCalculatorState
+      },
+      tariffs: {
+        insuranceStartAge: '',
+        insuranceEndAge: '',
+        maximumInsurancePeriod: '',
         ...baseCalculatorState
       }
     }
@@ -46,7 +63,7 @@ class App extends React.Component {
   }
 
   render() {
-    const targetsDictionary = { insurancePremium: "Страховой взнос", insuranceSum: "Страховую сумму" };
+    const targetsDictionary = { insurancePremium: "Страховой взнос", insuranceSum: "Страховую сумму", reserve: "Резерв", tariffs: "Тарифы" };
     return (
       <React.Fragment>
         <div className="choose-value-block">
@@ -62,7 +79,7 @@ class App extends React.Component {
           </select>
         </div>
         {/* key field is necessary to rerender new component after changing target. */}
-        <Calculator key={this.state.target}
+        <BaseCalculator key={this.state.target}
           target={this.state.target}
           storedState={this.calculatorStoredState[this.state.target]}
           updateStoredState={this.updateCalculatorState} />

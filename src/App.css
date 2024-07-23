@@ -7,7 +7,7 @@
   background-color: #f9f9f9;
   border: 1px solid #ccc;
   border-radius: 10px;
-  overflow-y: auto; 
+  overflow-y: auto;
 }
 
 h1 {
@@ -25,8 +25,7 @@ form {
   margin-bottom: 15px;
 }
 
-form input[type="text"],
-form input[type="date"],
+form input,
 form select {
   width: calc(100% - 20px);
   padding: 8px;
@@ -35,9 +34,46 @@ form select {
   border-radius: 5px;
 }
 
+.inputs-group {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+}
+
+.inputs-group * { 
+  width: auto;  
+}
+
+.inputs-group input { 
+  margin-left: 10px;
+}
+
+.inputs-group div { 
+  margin-top: 5px;
+}
+
+
+
+/* .inputs-group label,
+.inputs-group input {
+  width: auto;
+  padding: 8px;
+  margin-top: 5px; 
+}
+
+.inputs-group input {  
+  border: 1px solid #ccc;
+  border-radius: 5px;
+} */
+
+/* form div {
+  display: flex;
+  flex-direction: column;
+} */
+
 button {
-  display: inline-block; 
-  margin: auto;  
+  display: inline-block;
+  margin: auto;
   width: calc(20%);
   padding: 10px;
   border: none;
@@ -74,7 +110,7 @@ button:hover {
 }
 
 .result-display {
-  margin: 20px auto;  
+  margin: 20px auto;
   width: calc(60%);
   padding: 10px;
   border: 1px solid #4caf50;
