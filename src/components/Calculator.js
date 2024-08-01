@@ -50,34 +50,34 @@ class Calculator extends React.Component {
                 default:
                     if (this.state.inputVariable === "insurancePremium") {
                         requestData.insurancePremium = this.state.insurancePremium;
-                    } else { 
+                    } else {
                         requestData.insuranceSum = this.state.insuranceSum;
                     }
-                    
+
                     requestData.reserveCalculationPeriod = 12 * Number(this.state.reservePeriodYears) + Number(this.state.reservePeriodMonths);
             }
         } else {
             requestData.insuranceStartAge = this.state.insuranceStartAge;
             requestData.insuranceEndAge = this.state.insuranceEndAge;
-            requestData.maximumInsurancePeriod = this.state.maximumInsurancePeriod;
+            requestData.maximumInsurancePeriod = 12 * Number(this.state.maximumInsurancePeriodYears) + Number(this.state.maximumInsurancePeriodMonths);
         }
 
-        const requestParameters = target !== "tariffs" ? null :  {responseType: "blob"}
+        const requestParameters = target !== "tariffs" ? null : { responseType: "blob" }
         try {
-            const response = await axios.post(API_URL + routeDictionary[target], requestData,  requestParameters);
+            const response = await axios.post(API_URL + routeDictionary[target], requestData, requestParameters);
             if (target !== "tariffs") {
                 let value = response.data.result;
                 this.setState({ result: value });
                 this.props.updateStoredState("result", value);
-            } else {                
+            } else {
                 const blob = new Blob([response.data], { type: response.headers['content-type'] });
                 saveAs(blob, 'tariffs.xlsx');
-                
+
             }
         } catch (error) {
             console.error(`Error while sending request to ${routeDictionary[target]}`, error);
         }
-       
+
         // axios.post(API_URL + routeDictionary[target], requestData).then((response) => {
         //     let value = response.data.result;
         //     this.setState({ result: value });
@@ -135,9 +135,30 @@ class Calculator extends React.Component {
                             <FiedlGroup labelText="Введите конечный возраст страхования в годах:">
                                 <input type="number" name="insuranceEndAge" value={this.state.insuranceEndAge} onChange={this.handleChange} />
                             </FiedlGroup>
-                            <FiedlGroup labelText="Введите максимальный период страхования в годах:">
-                                <input type="number" name="maximumInsurancePeriod" value={this.state.maximumInsurancePeriod} onChange={this.handleChange} />
+                            {this.state.insuranceType !== "чисто накопительное страхование" ? (
+                                <FiedlGroup labelText="Введите максимальный период страхования в годах:">
+                                    <input type="number" name="maximumInsurancePeriodYears" value={this.state.maximumInsurancePeriodYears} onChange={this.handleChange} />
+                                </FiedlGroup>
+                            ) : (
+                                <FiedlGroup labelText="Введите максимальный период страхования:">
+                                <div className="inputs-group">
+                                    <div>
+                                        <label className="period-fields-group">
+                                            лет
+                                        </label>
+                                        <input type="number" name="maximumInsurancePeriodYears" value={this.state.maximumInsurancePeriodYears} onChange={this.handleChange} />
+                                    </div>
+                                    <div className="period-fields-group">
+                                        <label>
+                                            месяцев
+                                        </label>
+                                        <input type="number" name="maximumInsurancePeriodMonths" value={this.state.maximumInsurancePeriodMonths} onChange={this.handleChange} />
+                                    </div>
+                                </div>
                             </FiedlGroup>
+                            )
+                            }
+
                         </React.Fragment>
                     )}
                     {target !== "tariffs" && (
@@ -185,12 +206,12 @@ class Calculator extends React.Component {
                     {(target === "reserve") && (
                         <React.Fragment>
                             <div className="field-block">
-                                <input 
-                                type="radio" 
-                                name="inputVariable" 
-                                value="insurancePremium" 
-                                checked={this.state.inputVariable === "insurancePremium"} 
-                                onChange={this.handleChange} 
+                                <input
+                                    type="radio"
+                                    name="inputVariable"
+                                    value="insurancePremium"
+                                    checked={this.state.inputVariable === "insurancePremium"}
+                                    onChange={this.handleChange}
                                 />
                                 <label>Введите страховой взнос:</label>
                                 <input
@@ -202,13 +223,13 @@ class Calculator extends React.Component {
                                 />
                             </div>
                             <div className="field-block">
-                                <input 
-                                type="radio"
-                                 name="inputVariable" 
-                                 value="insuranceSum"
-                                 checked={this.state.inputVariable === "insuranceSum"} 
-                                 onChange={this.handleChange} 
-                                 />
+                                <input
+                                    type="radio"
+                                    name="inputVariable"
+                                    value="insuranceSum"
+                                    checked={this.state.inputVariable === "insuranceSum"}
+                                    onChange={this.handleChange}
+                                />
                                 <label>Введите страховую сумму:</label>
                                 <input
                                     type="text"

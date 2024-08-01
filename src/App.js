@@ -45,7 +45,8 @@ class App extends React.Component {
       tariffs: {
         insuranceStartAge: '',
         insuranceEndAge: '',
-        maximumInsurancePeriod: '',
+        maximumInsurancePeriodYears: '',
+        maximumInsurancePeriodMonths: '',
         ...baseCalculatorState
       }
     }
