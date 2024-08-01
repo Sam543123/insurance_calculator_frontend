@@ -1,6 +1,7 @@
 import React from 'react';
 import axios from "axios";
 import { API_URL } from "../constants.js"
+import { saveAs } from 'file-saver';
 
 function FiedlGroup({ labelText, children }) {
     return (
@@ -16,7 +17,7 @@ function FiedlGroup({ labelText, children }) {
 class Calculator extends React.Component {
     state = this.props.storedState;
 
-    handleSubmit = (e) => {
+    handleSubmit = async (e) => {
         e.preventDefault();
         const { target } = this.props;
         const routeDictionary = {
@@ -61,11 +62,27 @@ class Calculator extends React.Component {
             requestData.maximumInsurancePeriod = this.state.maximumInsurancePeriod;
         }
 
-        axios.post(API_URL + routeDictionary[target], requestData).then((response) => {
-            let value = response.data.result;
-            this.setState({ result: value });
-            this.props.updateStoredState("result", value);
-        });
+        const requestParameters = target !== "tariffs" ? null :  {responseType: "blob"}
+        try {
+            const response = await axios.post(API_URL + routeDictionary[target], requestData,  requestParameters);
+            if (target !== "tariffs") {
+                let value = response.data.result;
+                this.setState({ result: value });
+                this.props.updateStoredState("result", value);
+            } else {                
+                const blob = new Blob([response.data], { type: response.headers['content-type'] });
+                saveAs(blob, 'tariffs.xlsx');
+                
+            }
+        } catch (error) {
+            console.error(`Error while sending request to ${routeDictionary[target]}`, error);
+        }
+       
+        // axios.post(API_URL + routeDictionary[target], requestData).then((response) => {
+        //     let value = response.data.result;
+        //     this.setState({ result: value });
+        //     this.props.updateStoredState("result", value);
+        // });
     }
 
     // TODO code duplication
