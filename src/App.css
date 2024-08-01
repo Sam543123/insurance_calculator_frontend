@@ -34,6 +34,8 @@ form select {
   border-radius: 5px;
 }
 
+form input[type="radio"] {width: auto;}
+
 .inputs-group {
   display: flex;
   flex-direction: row;
@@ -51,25 +53,6 @@ form select {
 .inputs-group div { 
   margin-top: 5px;
 }
-
-
-
-/* .inputs-group label,
-.inputs-group input {
-  width: auto;
-  padding: 8px;
-  margin-top: 5px; 
-}
-
-.inputs-group input {  
-  border: 1px solid #ccc;
-  border-radius: 5px;
-} */
-
-/* form div {
-  display: flex;
-  flex-direction: column;
-} */
 
 button {
   display: inline-block;

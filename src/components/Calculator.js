@@ -47,7 +47,12 @@ class Calculator extends React.Component {
                     break;
                 // if target=reserve
                 default:
-                    requestData.insurancePremium = this.state.insurancePremium;
+                    if (this.state.inputVariable === "insurancePremium") {
+                        requestData.insurancePremium = this.state.insurancePremium;
+                    } else { 
+                        requestData.insuranceSum = this.state.insuranceSum;
+                    }
+                    
                     requestData.reserveCalculationPeriod = 12 * Number(this.state.reservePeriodYears) + Number(this.state.reservePeriodMonths);
             }
         } else {
@@ -162,9 +167,40 @@ class Calculator extends React.Component {
                     )}
                     {(target === "reserve") && (
                         <React.Fragment>
-                            <FiedlGroup labelText="Введите страховой взнос:">
-                                <input type="text" name="insurancePremium" value={this.state.insurancePremium} onChange={this.handleChange} />
-                            </FiedlGroup>
+                            <div className="field-block">
+                                <input 
+                                type="radio" 
+                                name="inputVariable" 
+                                value="insurancePremium" 
+                                checked={this.state.inputVariable === "insurancePremium"} 
+                                onChange={this.handleChange} 
+                                />
+                                <label>Введите страховой взнос:</label>
+                                <input
+                                    type="text"
+                                    name="insurancePremium"
+                                    value={this.state.insurancePremium}
+                                    onChange={this.handleChange}
+                                    disabled={this.state.inputVariable !== "insurancePremium"}
+                                />
+                            </div>
+                            <div className="field-block">
+                                <input 
+                                type="radio"
+                                 name="inputVariable" 
+                                 value="insuranceSum"
+                                 checked={this.state.inputVariable === "insuranceSum"} 
+                                 onChange={this.handleChange} 
+                                 />
+                                <label>Введите страховую сумму:</label>
+                                <input
+                                    type="text"
+                                    name="insuranceSum"
+                                    value={this.state.insuranceSum}
+                                    onChange={this.handleChange}
+                                    disabled={this.state.inputVariable !== "insuranceSum"}
+                                />
+                            </div>
                             <FiedlGroup labelText="Введите время от начала страхования до расчёта резерва:">
                                 <div className="inputs-group">
                                     <div>

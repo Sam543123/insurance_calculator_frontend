@@ -33,12 +33,13 @@ class App extends React.Component {
         ...intermediateCalculatorState
       },
       insuranceSum: {
-        insurancePremium: '',
+        insurancePremium: '',       
         ...intermediateCalculatorState
       },
       reserve: {
         reservPeriodYears: '',
         reservPeriodMonths: '',
+        inputVariable: "insurancePremium",
         ...intermediateCalculatorState
       },
       tariffs: {
