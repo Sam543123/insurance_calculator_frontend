@@ -14,6 +14,27 @@ function FiedlGroup({ labelText, children }) {
     )
 }
 
+function PeriodFieldGroup({ labelText, yearsFieldName, monthsFieldName, calculatorState, handleChange }) {
+    return (
+        <FiedlGroup labelText={labelText}>
+            <div className="inputs-group">
+                <div>
+                    <label className="period-fields-group">
+                        лет
+                    </label>
+                    <input type="number" name={yearsFieldName} value={calculatorState[yearsFieldName]} onChange={handleChange} />
+                </div>
+                <div className="period-fields-group">
+                    <label>
+                        месяцев
+                    </label>
+                    <input type="number" name={monthsFieldName} value={calculatorState[monthsFieldName]} onChange={handleChange} />
+                </div>
+            </div>
+        </FiedlGroup>
+    )
+}
+
 class Calculator extends React.Component {
     state = this.props.storedState;
 
@@ -36,9 +57,13 @@ class Calculator extends React.Component {
         };
 
         if (target !== "tariffs") {
-            requestData.birthDate = this.state.birthDate;
-            requestData.insuranceStartDate = this.state.insuranceStartDate;
-            requestData.insurancePeriod = 12 * Number(this.state.insurancePeriodYears) + Number(this.state.insurancePeriodMonths);
+            if (this.state.insuranceType !== "чисто накопительное страхование") {
+                requestData.birthDate = this.state.birthDate;
+                requestData.insuranceStartDate = this.state.insuranceStartDate;
+            } 
+            if (this.state.insuranceType !== "пожизненное страхование") {
+                requestData.insurancePeriod = 12 * Number(this.state.insurancePeriodYears) + Number(this.state.insurancePeriodMonths);
+            }
             switch (target) {
                 case 'insurancePremium':
                     requestData.insuranceSum = this.state.insuranceSum;
@@ -129,62 +154,55 @@ class Calculator extends React.Component {
                     </FiedlGroup>
                     {target === "tariffs" && (
                         <React.Fragment>
-                            <FiedlGroup labelText="Введите начальный возраст страхования в годах:">
-                                <input type="number" name="insuranceStartAge" value={this.state.insuranceStartAge} onChange={this.handleChange} />
-                            </FiedlGroup>
-                            <FiedlGroup labelText="Введите конечный возраст страхования в годах:">
-                                <input type="number" name="insuranceEndAge" value={this.state.insuranceEndAge} onChange={this.handleChange} />
-                            </FiedlGroup>
-                            {this.state.insuranceType !== "чисто накопительное страхование" ? (
-                                <FiedlGroup labelText="Введите максимальный период страхования в годах:">
-                                    <input type="number" name="maximumInsurancePeriodYears" value={this.state.maximumInsurancePeriodYears} onChange={this.handleChange} />
-                                </FiedlGroup>
-                            ) : (
-                                <FiedlGroup labelText="Введите максимальный период страхования:">
-                                <div className="inputs-group">
-                                    <div>
-                                        <label className="period-fields-group">
-                                            лет
-                                        </label>
-                                        <input type="number" name="maximumInsurancePeriodYears" value={this.state.maximumInsurancePeriodYears} onChange={this.handleChange} />
-                                    </div>
-                                    <div className="period-fields-group">
-                                        <label>
-                                            месяцев
-                                        </label>
-                                        <input type="number" name="maximumInsurancePeriodMonths" value={this.state.maximumInsurancePeriodMonths} onChange={this.handleChange} />
-                                    </div>
-                                </div>
-                            </FiedlGroup>
-                            )
-                            }
+                            {this.state.insuranceType !== "чисто накопительное страхование" && (
+                                <React.Fragment>
+                                    <FiedlGroup labelText="Введите начальный возраст страхования в годах:">
+                                        <input type="number" name="insuranceStartAge" value={this.state.insuranceStartAge} onChange={this.handleChange} />
+                                    </FiedlGroup>
+                                    <FiedlGroup labelText="Введите конечный возраст страхования в годах:">
+                                        <input type="number" name="insuranceEndAge" value={this.state.insuranceEndAge} onChange={this.handleChange} />
+                                    </FiedlGroup>
+                                </React.Fragment>
+                            )}
 
+                            {this.state.insuranceType !== "пожизненное страхование" && (
+                                this.state.insuranceType !== "чисто накопительное страхование" ? (
+                                    <FiedlGroup labelText="Введите максимальный период страхования в годах:">
+                                        <input type="number" name="maximumInsurancePeriodYears" value={this.state.maximumInsurancePeriodYears} onChange={this.handleChange} />
+                                    </FiedlGroup>
+                                ) : (
+                                    <PeriodFieldGroup
+                                        labelText="Введите максимальный период страхования:"
+                                        yearsFieldName="maximumInsurancePeriodYears"
+                                        monthsFieldName="maximumInsurancePeriodMonths"
+                                        calculatorState={this.state}
+                                        handleChange={this.handleChange}
+                                    />
+                                )
+                            )}
                         </React.Fragment>
                     )}
                     {target !== "tariffs" && (
                         <React.Fragment>
-                            <FiedlGroup labelText="Введите дату рождения застрахованного:">
-                                <input type="date" name="birthDate" value={this.state.birthDate} onChange={this.handleChange} />
-                            </FiedlGroup>
-                            <FiedlGroup labelText="Введите дату начала страхования:">
-                                <input type="date" name="insuranceStartDate" value={this.state.insuranceStartDate} onChange={this.handleChange} />
-                            </FiedlGroup>
-                            <FiedlGroup labelText="Введите период страхования:">
-                                <div className="inputs-group">
-                                    <div>
-                                        <label className="period-fields-group">
-                                            лет
-                                        </label>
-                                        <input type="number" name="insurancePeriodYears" value={this.state.insurancePeriodYears} onChange={this.handleChange} />
-                                    </div>
-                                    <div className="period-fields-group">
-                                        <label>
-                                            месяцев
-                                        </label>
-                                        <input type="number" name="insurancePeriodMonths" value={this.state.insurancePeriodMonths} onChange={this.handleChange} />
-                                    </div>
-                                </div>
-                            </FiedlGroup>
+                            {this.state.insuranceType !== "чисто накопительное страхование" && (
+                                <React.Fragment>
+                                    <FiedlGroup labelText="Введите дату рождения застрахованного:">
+                                        <input type="date" name="birthDate" value={this.state.birthDate} onChange={this.handleChange} />
+                                    </FiedlGroup>
+                                    <FiedlGroup labelText="Введите дату начала страхования:">
+                                        <input type="date" name="insuranceStartDate" value={this.state.insuranceStartDate} onChange={this.handleChange} />
+                                    </FiedlGroup>
+                                </React.Fragment>
+                            )}
+                            {this.state.insuranceType !== "пожизненное страхование" && (
+                                <PeriodFieldGroup
+                                    labelText="Введите период страхования:"
+                                    yearsFieldName="insurancePeriodYears"
+                                    monthsFieldName="insurancePeriodMonths"
+                                    calculatorState={this.state}
+                                    handleChange={this.handleChange}
+                                />
+                            )}
                         </React.Fragment>
                     )}
                     <FiedlGroup labelText="Введите доходность для страхового взноса:">
@@ -239,22 +257,13 @@ class Calculator extends React.Component {
                                     disabled={this.state.inputVariable !== "insuranceSum"}
                                 />
                             </div>
-                            <FiedlGroup labelText="Введите время от начала страхования до расчёта резерва:">
-                                <div className="inputs-group">
-                                    <div>
-                                        <label className="period-fields-group">
-                                            лет
-                                        </label>
-                                        <input type="number" name="reservePeriodYears" value={this.state.reservePeriodYears} onChange={this.handleChange} />
-                                    </div>
-                                    <div className="period-fields-group">
-                                        <label>
-                                            месяцев
-                                        </label>
-                                        <input type="number" name="reservePeriodMonths" value={this.state.reservePeriodMonths} onChange={this.handleChange} />
-                                    </div>
-                                </div>
-                            </FiedlGroup>
+                            <PeriodFieldGroup
+                                labelText="Введите время от начала страхования до расчёта резерва:"
+                                yearsFieldName="reservePeriodYears"
+                                monthsFieldName="reservePeriodMonths"
+                                calculatorState={this.state}
+                                handleChange={this.handleChange}
+                            />
                         </React.Fragment>
                     )}
                     <button type="submit">Вычислить</button>
