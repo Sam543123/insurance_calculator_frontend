@@ -21,7 +21,9 @@ class App extends React.Component {
       birthDate: '',
       insuranceStartDate: '',
       insurancePeriodYears: '',
-      insurancePeriodMonths: '',          
+      insurancePeriodMonths: '',
+      errors: null,
+      isButtonActive: false,         
       result: null
     }
     this.state = {
@@ -37,8 +39,8 @@ class App extends React.Component {
         ...intermediateCalculatorState
       },
       reserve: {
-        reservPeriodYears: '',
-        reservPeriodMonths: '',
+        reservePeriodYears: '',
+        reservePeriodMonths: '',
         inputVariable: "insurancePremium",
         ...intermediateCalculatorState
       },

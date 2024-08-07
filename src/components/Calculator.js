@@ -42,11 +42,18 @@ class Calculator extends React.Component {
 
     constructor(props) {
         super(props);
-        let errorsDictionary = Object.keys(this.props.storedState).reduce((acc, field) => {
-            acc[field] = null;
-            return acc;
-        }, {})
-        this.state = { ...this.props.storedState, errors: errorsDictionary, isButtonActive: false };
+        let errorsDictionary;
+        if (this.props.storedState.errors === null) {
+            errorsDictionary = Object.keys(this.props.storedState).filter(
+                (f) => !f in ["result", "errors", "isButtonActive"]
+            ).reduce((acc, field) => {
+                acc[field] = null;
+                return acc;
+            }, {})
+        } else {
+            errorsDictionary = {...this.props.storedState.errors};
+        }       
+        this.state = { ...this.props.storedState, errors: errorsDictionary };
     }
 
     toggleButton = () => {
@@ -85,7 +92,7 @@ class Calculator extends React.Component {
             excludedFields.add("insuranceStartAge", "insuranceEndAge", "birthDate", "insuranceStartDate");
         }
 
-        const trackedFields = allFields.filter((v) => !excludedFields.has(v));     
+        const trackedFields = allFields.filter((v) => !excludedFields.has(v));        
         if (trackedFields.every((v) => this.state[v] !== "") && trackedFields.every((v) => !this.state.errors[v])) {
             if (this.state.isButtonActive === false) {
                 this.setState({ isButtonActive: true });
@@ -102,7 +109,7 @@ class Calculator extends React.Component {
         let fieldsToValidate;
         let commonError;
         const currentDate = new Date();
-       
+
         if (fieldName === "insuranceStartDate" || fieldName === "birthDate") {
             commonError = "Birth date can't be later than insurance start date.";
             fieldsToValidate = ["insuranceStartDate", "birthDate"];
@@ -181,7 +188,7 @@ class Calculator extends React.Component {
                     newErrors[fieldName] = commonError;
                 }
             }
-        } else if (["reservePeriodYears", "reservePeriodMonths", "insurancePeriodYears", "insurancePeriodMonths"].includes(fieldName)) {          
+        } else if (["reservePeriodYears", "reservePeriodMonths", "insurancePeriodYears", "insurancePeriodMonths"].includes(fieldName)) {
             if (fieldName === "insurancePeriodYears" || fieldName === "insurancePeriodMonths") {
                 commonError = "Insurance period must be greater than 0.";
                 fieldsToValidate = ["insurancePeriodYears", "insurancePeriodMonths"];
@@ -222,8 +229,8 @@ class Calculator extends React.Component {
                         newErrors[fieldName] = "Number of months in period from insurance start to reserve calculation must be between 0 and 11."
                     }
                 }
-                if (!newErrors.reservePeriodYears && !newErrors.reservePeriodMonths) {                   
-                    if (fieldsToValidate.every((v) => updatedState[v] !== "") && (Number(updatedState.reservePeriodYears) === 0 && Number(updatedState.reservePeriodMonths) === 0)) {                       
+                if (!newErrors.reservePeriodYears && !newErrors.reservePeriodMonths) {
+                    if (fieldsToValidate.every((v) => updatedState[v] !== "") && (Number(updatedState.reservePeriodYears) === 0 && Number(updatedState.reservePeriodMonths) === 0)) {
                         newErrors[fieldName] = commonError;
                     }
                 }
@@ -234,14 +241,15 @@ class Calculator extends React.Component {
                 if (newErrors[v] === commonError) {
                     newErrors[v] = null;
                 }
-            })         
-            if (fieldsToValidate.every((v) => !newErrors[v])) {             
+            })
+            if (fieldsToValidate.every((v) => !newErrors[v])) {
                 if (fieldsToValidate.every((v) => updatedState[v] !== "") && (12 * Number(updatedState.reservePeriodYears) + Number(updatedState.reservePeriodMonths)) >= (12 * Number(updatedState.insurancePeriodYears) + Number(updatedState.insurancePeriodMonths))) {
                     newErrors[fieldName] = commonError;
                 }
             }
-        }       
+        }
         this.setState({ errors: newErrors })
+        this.props.updateStoredState("errors", newErrors);        
     }
 
 
@@ -331,6 +339,10 @@ class Calculator extends React.Component {
     }
 
     componentDidUpdate() {
+        this.toggleButton();
+    }
+
+    componentDidMount() {
         this.toggleButton();
     }
 
