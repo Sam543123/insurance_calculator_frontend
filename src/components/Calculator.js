@@ -1,6 +1,6 @@
 import React from "react";
 import axios from "axios";
-import { API_URL } from "../constants.js"
+import { API_URL, inputIntegerPattern, inputFloatPattern } from "../constants.js"
 import { saveAs } from "file-saver";
 
 function FiedlGroup({ labelText, children }) {
@@ -22,14 +22,14 @@ function PeriodFieldGroup({ labelText, yearsFieldName, monthsFieldName, calculat
                     <label className="period-fields-group">
                         лет
                     </label>
-                    <input type="number" name={yearsFieldName} value={calculatorState[yearsFieldName]} onChange={handleChange} />
+                    <input type="text" inputMode="numeric" pattern={inputIntegerPattern} name={yearsFieldName} value={calculatorState[yearsFieldName]} onChange={handleChange} />
                     {calculatorState.errors[yearsFieldName] && <div className="error">{calculatorState.errors[yearsFieldName]}</div>}
                 </div>
                 <div className="period-fields-group">
                     <label>
                         месяцев
                     </label>
-                    <input type="number" name={monthsFieldName} value={calculatorState[monthsFieldName]} onChange={handleChange} />
+                    <input type="text" inputMode="numeric" pattern={inputIntegerPattern} name={monthsFieldName} value={calculatorState[monthsFieldName]} onChange={handleChange} />
                     {calculatorState.errors[monthsFieldName] && <div className="error">{calculatorState.errors[monthsFieldName]}</div>}
                 </div>
             </div>
@@ -45,14 +45,14 @@ class Calculator extends React.Component {
         let errorsDictionary;
         if (this.props.storedState.errors === null) {
             errorsDictionary = Object.keys(this.props.storedState).filter(
-                (f) => !f in ["result", "errors", "isButtonActive"]
+                (f) => !(f in ["result", "errors", "isButtonActive"])
             ).reduce((acc, field) => {
                 acc[field] = null;
                 return acc;
             }, {})
         } else {
-            errorsDictionary = {...this.props.storedState.errors};
-        }       
+            errorsDictionary = { ...this.props.storedState.errors };
+        }
         this.state = { ...this.props.storedState, errors: errorsDictionary };
     }
 
@@ -66,6 +66,7 @@ class Calculator extends React.Component {
         } else {
             ["birthDate", "insuranceStartDate", "insurancePeriodYears", "insurancePeriodMonths", "insurancePremium", "insuranceSum"].forEach((v) => { excludedFields.add(v) })
         }
+
 
         if (target !== "reserve") {
             ["reservePeriodYears", "reservePeriodMonths"].forEach((v) => { excludedFields.add(v) })
@@ -84,15 +85,15 @@ class Calculator extends React.Component {
         }
 
         if (this.state.insuranceType !== "чисто накопительное страхование") {
-            excludedFields.add("maximumInsurancePeriodMonths");
+            ["maximumInsurancePeriodMonths", "maximumInsurancePeriodYears"].forEach((v) => { excludedFields.add(v) });
             if (this.state.insuranceType === "пожизненное страхование") {
                 ["maximumInsurancePeriodYears", "insurancePeriodYears", "insurancePeriodMonths"].forEach((v) => { excludedFields.add(v) })
             }
         } else {
-            excludedFields.add("insuranceStartAge", "insuranceEndAge", "birthDate", "insuranceStartDate");
+            ["insuranceStartAge", "insuranceEndAge", "birthDate", "insuranceStartDate, maximumInsurancePeriod"].forEach((v) => { excludedFields.add(v) });
         }
 
-        const trackedFields = allFields.filter((v) => !excludedFields.has(v));        
+        const trackedFields = allFields.filter((v) => !excludedFields.has(v));
         if (trackedFields.every((v) => this.state[v] !== "") && trackedFields.every((v) => !this.state.errors[v])) {
             if (this.state.isButtonActive === false) {
                 this.setState({ isButtonActive: true });
@@ -165,6 +166,10 @@ class Calculator extends React.Component {
                 if (fieldsToValidate.every((v) => updatedState[v] !== "") && (updatedState.maximumInsurancePeriodYears === 0 && updatedState.maximumInsurancePeriodMonths === 0)) {
                     newErrors[fieldName] = commonError;
                 }
+            }
+        } else if (fieldName === "maximumInsurancePeriod") {
+            if (updatedState.maximumInsurancePeriod !== "" && Number(updatedState.maximumInsurancePeriod) <= 0) {
+                newErrors[fieldName] = "Maximum insurance period must be greater than 0.";
             }
         } else if (fieldName === "insuranceStartAge" || fieldName === "insuranceEndAge") {
             commonError = "Age of insurance start can't be greater than age of insurance end.";
@@ -249,7 +254,7 @@ class Calculator extends React.Component {
             }
         }
         this.setState({ errors: newErrors })
-        this.props.updateStoredState("errors", newErrors);        
+        this.props.updateStoredState("errors", newErrors);
     }
 
 
@@ -300,7 +305,11 @@ class Calculator extends React.Component {
         } else {
             requestData.insuranceStartAge = this.state.insuranceStartAge;
             requestData.insuranceEndAge = this.state.insuranceEndAge;
-            requestData.maximumInsurancePeriod = 12 * Number(this.state.maximumInsurancePeriodYears) + Number(this.state.maximumInsurancePeriodMonths);
+            if (this.state.insuranceType !== "чисто накопительное страхование") {
+                requestData.maximumInsurancePeriod = 12 * Number(this.state.maximumInsurancePeriod);
+            } else {
+                requestData.maximumInsurancePeriod = 12 * Number(this.state.maximumInsurancePeriodYears) + Number(this.state.maximumInsurancePeriodMonths);
+            }
         }
 
         const requestParameters = target !== "tariffs" ? null : { responseType: "blob" }
@@ -328,7 +337,13 @@ class Calculator extends React.Component {
 
     // TODO code duplication
     handleChange = (e) => {
+        if (!e.target.validity.valid) {
+            return;
+        }
         const { name, value } = e.target;
+        // console.log(value);
+        // console.log(Number(value));
+        // console.log(typeof value);
         let updatedState = { ...this.state, [name]: value }
         this.validate(name, updatedState)
         // this.toggleButton(updatedState);
@@ -387,11 +402,11 @@ class Calculator extends React.Component {
                             {this.state.insuranceType !== "чисто накопительное страхование" && (
                                 <React.Fragment>
                                     <FiedlGroup labelText="Введите начальный возраст страхования в годах:">
-                                        <input type="number" name="insuranceStartAge" value={this.state.insuranceStartAge} onChange={this.handleChange} />
+                                        <input type="text" inputMode="numeric" pattern={inputIntegerPattern} name="insuranceStartAge" value={this.state.insuranceStartAge} onChange={this.handleChange} />
                                         {errors.insuranceStartAge && <div className="error">{errors.insuranceStartAge}</div>}
                                     </FiedlGroup>
                                     <FiedlGroup labelText="Введите конечный возраст страхования в годах:">
-                                        <input type="number" name="insuranceEndAge" value={this.state.insuranceEndAge} onChange={this.handleChange} />
+                                        <input type="text" inputMode="numeric" pattern={inputIntegerPattern} name="insuranceEndAge" value={this.state.insuranceEndAge} onChange={this.handleChange} />
                                         {errors.insuranceEndAge && <div className="error">{errors.insuranceEndAge}</div>}
                                     </FiedlGroup>
                                 </React.Fragment>
@@ -400,8 +415,8 @@ class Calculator extends React.Component {
                             {this.state.insuranceType !== "пожизненное страхование" && (
                                 this.state.insuranceType !== "чисто накопительное страхование" ? (
                                     <FiedlGroup labelText="Введите максимальный период страхования в годах:">
-                                        <input type="number" name="maximumInsurancePeriodYears" value={this.state.maximumInsurancePeriodYears} onChange={this.handleChange} />
-                                        {errors.maximumInsurancePeriodYears && <div className="error">{errors.maximumInsurancePeriodYears}</div>}
+                                        <input type="text" inputMode="numeric" pattern={inputIntegerPattern} name="maximumInsurancePeriod" value={this.state.maximumInsurancePeriod} onChange={this.handleChange} />
+                                        {errors.maximumInsurancePeriod && <div className="error">{errors.maximumInsurancePeriod}</div>}
                                     </FiedlGroup>
                                 ) : (
                                     <PeriodFieldGroup
@@ -441,22 +456,22 @@ class Calculator extends React.Component {
                         </React.Fragment>
                     )}
                     <FiedlGroup labelText="Введите доходность для страхового взноса:">
-                        <input type="number" name="insurancePremiumRate" value={this.state.insurancePremiumRate} onChange={this.handleChange} />
+                        <input type="text" inputMode="numeric" pattern={inputFloatPattern} name="insurancePremiumRate" value={this.state.insurancePremiumRate} onChange={this.handleChange} />
                         {errors.insurancePremiumRate && <div className="error">{errors.insurancePremiumRate}</div>}
                     </FiedlGroup>
                     <FiedlGroup labelText="Введите нагрузку:">
-                        <input type="number" name="insuranceLoading" value={this.state.insuranceLoading} onChange={this.handleChange} />
+                        <input type="text" inputMode="numeric" pattern={inputFloatPattern} name="insuranceLoading" value={this.state.insuranceLoading} onChange={this.handleChange} />
                         {errors.insuranceLoading && <div className="error">{errors.insuranceLoading}</div>}
                     </FiedlGroup>
                     {(target === "insuranceSum") && (
                         <FiedlGroup labelText="Введите страховой взнос:">
-                            <input type="number" name="insurancePremium" value={this.state.insurancePremium} onChange={this.handleChange} />
+                            <input type="text" inputMode="numeric" pattern={inputFloatPattern} name="insurancePremium" value={this.state.insurancePremium} onChange={this.handleChange} />
                             {errors.insurancePremium && <div className="error">{errors.insurancePremium}</div>}
                         </FiedlGroup>
                     )}
                     {(target === "insurancePremium") && (
                         <FiedlGroup labelText="Введите страховую сумму:">
-                            <input type="number" name="insuranceSum" value={this.state.insuranceSum} onChange={this.handleChange} />
+                            <input type="text" inputMode="numeric" pattern={inputFloatPattern} name="insuranceSum" value={this.state.insuranceSum} onChange={this.handleChange} />
                             {errors.insuranceSum && <div className="error">{errors.insuranceSum}</div>}
                         </FiedlGroup>
                     )}
@@ -472,7 +487,9 @@ class Calculator extends React.Component {
                                 />
                                 <label>Введите страховой взнос:</label>
                                 <input
-                                    type="number"
+                                    type="text"
+                                    inputMode="numeric"
+                                    pattern={inputFloatPattern}
                                     name="insurancePremium"
                                     value={this.state.insurancePremium}
                                     onChange={this.handleChange}
@@ -490,7 +507,9 @@ class Calculator extends React.Component {
                                 />
                                 <label>Введите страховую сумму:</label>
                                 <input
-                                    type="number"
+                                    type="text"
+                                    inputMode="numeric"
+                                    pattern={inputFloatPattern}
                                     name="insuranceSum"
                                     value={this.state.insuranceSum}
                                     onChange={this.handleChange}

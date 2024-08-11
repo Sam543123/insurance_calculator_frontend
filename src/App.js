@@ -13,7 +13,9 @@ class App extends React.Component {
       gender: 'мужской',
       insurancePremiumRate: '',
       insuranceLoading: '',    
-      result: null
+      result: null,
+      errors: null,
+      isButtonActive: false, 
     }
 
     const intermediateCalculatorState = {
@@ -21,10 +23,7 @@ class App extends React.Component {
       birthDate: '',
       insuranceStartDate: '',
       insurancePeriodYears: '',
-      insurancePeriodMonths: '',
-      errors: null,
-      isButtonActive: false,         
-      result: null
+      insurancePeriodMonths: ''
     }
     this.state = {
       target: "insurancePremium"
@@ -42,11 +41,14 @@ class App extends React.Component {
         reservePeriodYears: '',
         reservePeriodMonths: '',
         inputVariable: "insurancePremium",
+        insuranceSum: '',
+        insurancePremium: '',
         ...intermediateCalculatorState
       },
       tariffs: {
         insuranceStartAge: '',
         insuranceEndAge: '',
+        maximumInsurancePeriod: '',
         maximumInsurancePeriodYears: '',
         maximumInsurancePeriodMonths: '',
         ...baseCalculatorState
