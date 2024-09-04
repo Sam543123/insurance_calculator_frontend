@@ -2,6 +2,7 @@ import React from "react";
 import axios from "axios";
 import { API_URL, inputIntegerPattern, inputFloatPattern } from "../constants.js"
 import { saveAs } from "file-saver";
+import moment from 'moment';
 
 function FiedlGroup({ labelText, children }) {
     return (
@@ -45,7 +46,7 @@ class Calculator extends React.Component {
         let errorsDictionary;
         if (this.props.storedState.errors === null) {
             errorsDictionary = Object.keys(this.props.storedState).filter(
-                (f) => !(f in ["result", "errors", "isButtonActive"])
+                (f) => !["result", "errors", "isButtonActive"].includes(f)
             ).reduce((acc, field) => {
                 acc[field] = null;
                 return acc;
@@ -111,25 +112,7 @@ class Calculator extends React.Component {
         let commonError;
         const currentDate = new Date();
 
-        if (fieldName === "insuranceStartDate" || fieldName === "birthDate") {
-            commonError = "Birth date can't be later than insurance start date.";
-            fieldsToValidate = ["insuranceStartDate", "birthDate"];
-            fieldsToValidate.forEach((v) => {
-                if (newErrors[v] === commonError) {
-                    newErrors[v] = null;
-                }
-            })
-            if (fieldName === "birthDate") {
-                if (updatedState.birthDate !== "" && Date.parse(updatedState.birthDate) > currentDate) {
-                    newErrors[fieldName] = "Birth date can't be later than current moment.";
-                }
-            }
-            if (!newErrors.insuranceStartDate && !newErrors.birthDate) {
-                if (fieldsToValidate.every((v) => updatedState[v] !== "") && Date.parse(updatedState.birthDate) > Date.parse(updatedState.insuranceStartDate)) {
-                    newErrors[fieldName] = commonError;
-                }
-            }
-        } else if (fieldName === "insuranceLoading") {
+        if (fieldName === "insuranceLoading") {
             if (updatedState.insuranceLoading !== "" && (updatedState.insuranceLoading < 0 || updatedState.insuranceLoading >= 1)) {
                 newErrors[fieldName] = "Insurance loading must be greater than or equal to 0 and less than 1.";
             }
@@ -167,34 +150,76 @@ class Calculator extends React.Component {
                     newErrors[fieldName] = commonError;
                 }
             }
-        } else if (fieldName === "maximumInsurancePeriod") {
-            if (updatedState.maximumInsurancePeriod !== "" && Number(updatedState.maximumInsurancePeriod) <= 0) {
-                newErrors[fieldName] = "Maximum insurance period must be greater than 0.";
-            }
-        } else if (fieldName === "insuranceStartAge" || fieldName === "insuranceEndAge") {
+        } else if (["insuranceStartAge", "insuranceEndAge", "maximumInsurancePeriod"].includes(fieldName)) {
             commonError = "Age of insurance start can't be greater than age of insurance end.";
-            fieldsToValidate = ["insuranceStartAge", "insuranceEndAge"];
-            fieldsToValidate.forEach((v) => {
-                if (newErrors[v] === commonError) {
-                    newErrors[v] = null;
+            let commonError2 = "Sum of minimum insurance age and maximum insurance period can't be greater than 101 year.";
+            let errorsForField1 = []
+            if (fieldName === "maximumInsurancePeriod") {
+                if (updatedState.maximumInsurancePeriod !== "" && Number(updatedState.maximumInsurancePeriod) <= 0) {
+                    newErrors[fieldName] = "Maximum insurance period must be greater than 0.";
                 }
-            });
-            if (fieldName === "insuranceStartAge") {
+            } else if (fieldName === "insuranceStartAge") {
                 if (updatedState.insuranceStartAge !== "" && updatedState.insuranceStartAge < 0) {
                     newErrors[fieldName] = "Age of insurance start can't be less than 0.";
                 }
             } else {
-                if (updatedState.insuranceEndAge !== "" && updatedState.insuranceEndAge < 0) {
-                    newErrors[fieldName] = "Age of insurance end can't be less than 0.";
+                if (updatedState.insuranceEndAge !== "" && (updatedState.insuranceEndAge < 0 || updatedState.insuranceEndAge > 100)) {
+                    newErrors[fieldName] = "Age of insurance end must between 0 and 100.";
                 }
             }
-            if (!newErrors.insuranceStartAge && !newErrors.insuranceEndAge) {
-                if (fieldsToValidate.every((v) => updatedState[v] !== "") && (updatedState.insuranceStartAge > updatedState.insuranceEndAge)) {
-                    newErrors[fieldName] = commonError;
+            // TODO: redo it later because it is difficult to understand       
+            fieldsToValidate = ["insuranceStartAge", "insuranceEndAge"];
+            if (fieldsToValidate.includes(fieldName)) {
+                console.log("error1")
+                fieldsToValidate.forEach((v) => {
+                    if (newErrors[v]?.includes(commonError)) {
+                        newErrors[v] = newErrors[v].replace(commonError, "").trim() || null;
+                    }
+                });
+                if (fieldsToValidate.every((v) => !newErrors[v] || newErrors[v] === commonError2)) {
+                    if (fieldsToValidate.every((v) => updatedState[v] !== "") && (Number(updatedState.insuranceStartAge) > Number(updatedState.insuranceEndAge))) {
+                        errorsForField1.push(commonError);
+                    }
+                }
+
+            }
+            fieldsToValidate = ["insuranceStartAge", "maximumInsurancePeriod"];
+            if (fieldsToValidate.includes(fieldName)) {
+                console.log("error2")
+                fieldsToValidate.forEach((v) => {
+                    if (newErrors[v]?.includes(commonError2)) {
+                        newErrors[v] = newErrors[v].replace(commonError2, "").trim() || null;
+                    }
+                });
+                if (fieldsToValidate.every((v) => !newErrors[v] || newErrors[v] === commonError)) {
+                    if (fieldsToValidate.every((v) => updatedState[v] !== "") && (Number(updatedState.maximumInsurancePeriod) + Number(updatedState.insuranceStartAge) > 101)) {
+                        errorsForField1.push(commonError2);
+                    }
                 }
             }
-        } else if (["reservePeriodYears", "reservePeriodMonths", "insurancePeriodYears", "insurancePeriodMonths"].includes(fieldName)) {
-            if (fieldName === "insurancePeriodYears" || fieldName === "insurancePeriodMonths") {
+            if (errorsForField1.length !== 0) {
+                newErrors[fieldName] = errorsForField1.join("\n");
+            }
+        } else if (["birthDate", "insuranceStartDate", "insurancePeriodYears", "insurancePeriodMonths", "reservePeriodYears", "reservePeriodMonths"].includes(fieldName)) {
+            if (fieldName === "insuranceStartDate" || fieldName === "birthDate") {
+                commonError = "Birth date can't be later than insurance start date.";
+                fieldsToValidate = ["insuranceStartDate", "birthDate"];
+                fieldsToValidate.forEach((v) => {
+                    if (newErrors[v] === commonError) {
+                        newErrors[v] = null;
+                    }
+                })
+                if (fieldName === "birthDate") {
+                    if (updatedState.birthDate !== "" && Date.parse(updatedState.birthDate) > currentDate) {
+                        newErrors[fieldName] = "Birth date can't be later than current moment.";
+                    }
+                }
+                if (!newErrors.insuranceStartDate && !newErrors.birthDate) {
+                    if (fieldsToValidate.every((v) => updatedState[v] !== "") && Date.parse(updatedState.birthDate) > Date.parse(updatedState.insuranceStartDate)) {
+                        newErrors[fieldName] = commonError;
+                    }
+                }
+            } else if (fieldName === "insurancePeriodYears" || fieldName === "insurancePeriodMonths") {
                 commonError = "Insurance period must be greater than 0.";
                 fieldsToValidate = ["insurancePeriodYears", "insurancePeriodMonths"];
                 fieldsToValidate.forEach((v) => {
@@ -240,17 +265,44 @@ class Calculator extends React.Component {
                     }
                 }
             }
-            commonError = "Period from insurance start to reserve calculation must be less than insurance period.";
+
+            // TODO: redo it later because it is difficult to understand
+            let errorsForField = []
+            const commonReserveError = "Period from insurance start to reserve calculation must be less than insurance period.";
+            const commonAgeError = "Age of insured person at the end of insurance period can't be more than 101.";
+            fieldsToValidate = ["birthDate", "insuranceStartDate", "insurancePeriodYears", "insurancePeriodMonths"];
+            if (fieldsToValidate.includes(fieldName) && updatedState.insuranceType !== "чисто накопительное страхование") {
+                fieldsToValidate.forEach((v) => {
+                    if (newErrors[v]?.includes(commonAgeError)) {
+                        newErrors[v] = newErrors[v].replace(commonAgeError, "").trim() || null;
+                    }
+                })
+                const dateDifference = moment.duration(moment(Date.parse(updatedState.insuranceStartDate)).diff(moment(Date.parse(updatedState.birthDate))));
+                const endAge = 12 * (dateDifference.years() + Number(updatedState.insurancePeriodYears)) + dateDifference.months() + Number(updatedState.insurancePeriodMonths)
+                console.log("endAge", endAge)
+                if (fieldsToValidate.every((v) => !newErrors[v] || newErrors[v] === commonReserveError)) {
+                    if (fieldsToValidate.every((v) => updatedState[v] !== "") && (endAge > 1212 || (endAge === 1212 && dateDifference.days() !== 0))) {
+                        errorsForField.push(commonAgeError);
+                    }
+                }
+            }
+
             fieldsToValidate = ["reservePeriodYears", "reservePeriodMonths", "insurancePeriodYears", "insurancePeriodMonths"];
-            fieldsToValidate.forEach((v) => {
-                if (newErrors[v] === commonError) {
-                    newErrors[v] = null;
+            if (fieldsToValidate.includes(fieldName)) {
+                fieldsToValidate.forEach((v) => {
+                    if (newErrors[v]?.includes(commonReserveError)) {
+                        newErrors[v] = newErrors[v].replace(commonReserveError, "").trim() || null;
+                    }
+                })
+                if (fieldsToValidate.every((v) => !newErrors[v] || newErrors[v] === commonAgeError)) {
+                    if (fieldsToValidate.every((v) => updatedState[v] !== "") && (12 * Number(updatedState.reservePeriodYears) + Number(updatedState.reservePeriodMonths)) >= (12 * Number(updatedState.insurancePeriodYears) + Number(updatedState.insurancePeriodMonths))) {
+                        errorsForField.push(commonReserveError)
+                    }
                 }
-            })
-            if (fieldsToValidate.every((v) => !newErrors[v])) {
-                if (fieldsToValidate.every((v) => updatedState[v] !== "") && (12 * Number(updatedState.reservePeriodYears) + Number(updatedState.reservePeriodMonths)) >= (12 * Number(updatedState.insurancePeriodYears) + Number(updatedState.insurancePeriodMonths))) {
-                    newErrors[fieldName] = commonError;
-                }
+            }
+
+            if (errorsForField.length !== 0) {
+                newErrors[fieldName] = errorsForField.join("\n");
             }
         }
         this.setState({ errors: newErrors })
