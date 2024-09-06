@@ -152,7 +152,7 @@ class Calculator extends React.Component {
             }
         } else if (["insuranceStartAge", "insuranceEndAge", "maximumInsurancePeriod"].includes(fieldName)) {
             commonError = "Age of insurance start can't be greater than age of insurance end.";
-            let commonError2 = "Sum of minimum insurance age and maximum insurance period can't be greater than 101 year.";
+            let commonError2 = "Sum of maximum insurance age and maximum insurance period can't be greater than 101 year.";
             let errorsForField1 = []
             if (fieldName === "maximumInsurancePeriod") {
                 if (updatedState.maximumInsurancePeriod !== "" && Number(updatedState.maximumInsurancePeriod) <= 0) {
@@ -169,8 +169,7 @@ class Calculator extends React.Component {
             }
             // TODO: redo it later because it is difficult to understand       
             fieldsToValidate = ["insuranceStartAge", "insuranceEndAge"];
-            if (fieldsToValidate.includes(fieldName)) {
-                console.log("error1")
+            if (fieldsToValidate.includes(fieldName)) {                
                 fieldsToValidate.forEach((v) => {
                     if (newErrors[v]?.includes(commonError)) {
                         newErrors[v] = newErrors[v].replace(commonError, "").trim() || null;
@@ -183,16 +182,15 @@ class Calculator extends React.Component {
                 }
 
             }
-            fieldsToValidate = ["insuranceStartAge", "maximumInsurancePeriod"];
-            if (fieldsToValidate.includes(fieldName)) {
-                console.log("error2")
+            fieldsToValidate = ["insuranceEndAge", "maximumInsurancePeriod"];
+            if (fieldsToValidate.includes(fieldName)) {               
                 fieldsToValidate.forEach((v) => {
                     if (newErrors[v]?.includes(commonError2)) {
                         newErrors[v] = newErrors[v].replace(commonError2, "").trim() || null;
                     }
                 });
                 if (fieldsToValidate.every((v) => !newErrors[v] || newErrors[v] === commonError)) {
-                    if (fieldsToValidate.every((v) => updatedState[v] !== "") && (Number(updatedState.maximumInsurancePeriod) + Number(updatedState.insuranceStartAge) > 101)) {
+                    if (fieldsToValidate.every((v) => updatedState[v] !== "") && (Number(updatedState.maximumInsurancePeriod) + Number(updatedState.insuranceEndAge) > 101)) {
                         errorsForField1.push(commonError2);
                     }
                 }
@@ -278,8 +276,7 @@ class Calculator extends React.Component {
                     }
                 })
                 const dateDifference = moment.duration(moment(Date.parse(updatedState.insuranceStartDate)).diff(moment(Date.parse(updatedState.birthDate))));
-                const endAge = 12 * (dateDifference.years() + Number(updatedState.insurancePeriodYears)) + dateDifference.months() + Number(updatedState.insurancePeriodMonths)
-                console.log("endAge", endAge)
+                const endAge = 12 * (dateDifference.years() + Number(updatedState.insurancePeriodYears)) + dateDifference.months() + Number(updatedState.insurancePeriodMonths)                
                 if (fieldsToValidate.every((v) => !newErrors[v] || newErrors[v] === commonReserveError)) {
                     if (fieldsToValidate.every((v) => updatedState[v] !== "") && (endAge > 1212 || (endAge === 1212 && dateDifference.days() !== 0))) {
                         errorsForField.push(commonAgeError);
