@@ -27,9 +27,72 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
     }, {})
     const result = savedResult;
 
-    const handleInput = (e) => {
-        commonHandleInput(e, input, setInput)
+    // const handleInput = (e) => {
+    //     commonHandleInput(e, input, setInput)
+    // }
+
+    const validate = (fieldName, updatedInput) => {
+        let newErrors = { ...errors, [fieldName]: null };
+        let fieldsToValidate;
+        let commonError;
+        newErrors = getBaseValidationErrors(fieldName, updatedInput, newErrors);
+        newErrors = getIntermediateValidationErrors(fieldName, updatedInput, newErrors);   
+
+        if (fieldName === "insurancePremium") {
+            if (updatedInput.insurancePremium !== "" && updatedInput.insurancePremium < 0) {
+                newErrors[fieldName] = { message: "Insurance premium must be greater than 0.", isPersonalFieldError: true };
+            }
+        } else if (fieldName === "insuranceSum") {
+            if (updatedInput.insuranceSum !== "" && updatedInput.insuranceSum < 0) {
+                newErrors[fieldName] = { message: "Insurance sum must be greater than 0.", isPersonalFieldError: true };
+            }
+        }
+
+        fieldsToValidate = fieldsToValidate = ["reservePeriodYears", "reservePeriodMonths"];
+        if (fieldsToValidate.includes(fieldName)) {
+            if (fieldName === "reservePeriodMonths") {
+                if (updatedInput.reservePeriodMonths !== "" && updatedInput.reservePeriodMonths > 11) {
+                    newErrors[fieldName] = { message: "Number of months in period from insurance start to reserve calculation must be less than 12.", isPersonalFieldError: true };
+                }
+            }    
+            commonError = "Period from insurance start to reserve calculation must be greater than 0.";
+            clearPreviousCommonError(fieldsToValidate, newErrors, commonError);
+            personalFieldInputCorrect = fieldsToValidate.every((f) => newErrors[f].isPersonalFieldError === false && updatedInput[f] !== "");
+            if (personalFieldInputCorrect) {
+                if (Number(updatedInput.reservePeriodYears) === 0 && Number(updatedInput.reservePeriodMonths) === 0) {
+                    newErrors[fieldName] = { message: commonError, isPersonalFieldError: false };
+                }
+            }
+        }
+
+        fieldsToValidate = fieldsToValidate = ["insurancePeriodYears", "insurancePeriodMonths", "reservePeriodYears", "reservePeriodMonths"];
+        if (fieldsToValidate.includes(fieldName)) {        
+            commonError = "Period from insurance start to reserve calculation must be less than insurance period.";
+            clearPreviousCommonError(fieldsToValidate, newErrors, commonError);
+            personalFieldInputCorrect = fieldsToValidate.every((f) => newErrors[f].isPersonalFieldError === false && updatedInput[f] !== "");
+            if (personalFieldInputCorrect) {
+                if (fieldsToValidate.every((v) => updatedInput[v] !== "") && (12 * Number(updatedInput.reservePeriodYears) + Number(updatedInput.reservePeriodMonths)) >= (12 * Number(updatedInput.insurancePeriodYears) + Number(updatedInput.insurancePeriodMonths))) {
+                    newErrors[fieldName] = { message: commonError, isPersonalFieldError: false };
+                }
+            }
+        }
+        setErrors(newErrors)
     }
+
+    const handleInput = (e) => {
+        if (!e.target.validity.valid) {
+            return;
+        }
+        const { name, value } = e.target;
+        let updatedInput = { ...input, [name]: value }
+        validate(name, updatedInput)       
+        setInput(updatedInput);
+    }   
+
+    React.useLayoutEffect(()=>{
+       const buttonState = getButtonState(input, errors);
+       setIsButtonActive(buttonState);
+    }, [input, errors])
 
     const handleSubmit = async (e) => {
         e.preventDefault();
