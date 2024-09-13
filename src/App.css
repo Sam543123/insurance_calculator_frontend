@@ -40,6 +40,7 @@ form input[type="radio"] {width: auto;}
   display: flex;
   flex-direction: row;
   justify-content: space-evenly;
+  /* align-items: center; */
 }
 
 .inputs-group * { 

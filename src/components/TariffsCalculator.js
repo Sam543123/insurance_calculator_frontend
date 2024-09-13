@@ -1,7 +1,12 @@
 import React from "react";
 import CalculatorField from "./CalculatorField.js"
-import commonHandleInput from "../utils/handlers.js"
-import { inputIntegerPattern } from "../constants.js"
+import CalculatorTraitFieldGroup from "./CalculatorTraitFieldGroup.js"
+import CalculatorPaymentFieldGroup from "./CalculatorPaymentFieldGroup.js"
+import PeriodFieldGroup from "./PeriodFieldGroup.js";
+import { inputIntegerPattern, API_URL } from "../constants.js"
+import { getBaseValidationErrors, getButtonState, clearPreviousCommonError } from "../utils.js"
+import axios from "axios";
+import { saveAs } from "file-saver";
 
 
 function TariffsCalculator({ savedInput, savedErrors, setInput, setErrors }) {
@@ -21,22 +26,19 @@ function TariffsCalculator({ savedInput, savedErrors, setInput, setErrors }) {
     const errors = savedErrors || Object.keys(input).reduce((acc, field) => {
         acc[field] = { messages: [], personalFieldErrors: false };
         return acc;
-    }, {})
-
-    // const handleInput = (e) => {
-    //     commonHandleInput(e, input, setInput)
-    // }
+    }, {}) 
 
     const validate = (fieldName, updatedInput) => {
         let newErrors = { ...errors, [fieldName]: { messages: [], personalFieldErrors: false } };
         let fieldsToValidate;
         let commonError;
+        let personalFieldInputCorrect;
         newErrors = getBaseValidationErrors(fieldName, updatedInput, newErrors);       
 
         fieldsToValidate = ["maximumInsurancePeriodYears", "maximumInsurancePeriodMonths"];
         if (fieldsToValidate.includes(fieldName)) {                     
             if (fieldName === "maximumInsurancePeriodMonths") {
-                if (updatedState.maximumInsurancePeriodMonths !== "" && Number(updatedState.maximumInsurancePeriodMonths) > 11) {
+                if (updatedInput.maximumInsurancePeriodMonths !== "" && Number(updatedInput.maximumInsurancePeriodMonths) > 11) {
                     newErrors[fieldName].messages.push("Number of months in maximum insurance period must be less than 12.");
                     newErrors[fieldName].personalFieldErrors=true;
                 }
@@ -134,7 +136,7 @@ function TariffsCalculator({ savedInput, savedErrors, setInput, setErrors }) {
     return (
         <div className="App">
             <form onSubmit={handleSubmit} noValidate>
-                <CalculatorStartFieldGroup
+                <CalculatorTraitFieldGroup
                     insuranceType={input.insuranceType}
                     insurancePremiumFrequency={input.insurancePremiumFrequency}
                     gender={input.gender}
@@ -145,11 +147,11 @@ function TariffsCalculator({ savedInput, savedErrors, setInput, setErrors }) {
                         <React.Fragment>
                             <CalculatorField labelText="Enter minimum insurance start age:">
                                 <input type="text" inputMode="numeric" pattern={inputIntegerPattern} name="insuranceMinimumStartAge" value={input.insuranceMinimumStartAge} onChange={handleInput} />
-                                {errors.insuranceMinimumStartAge && <div className="error">{errors.insuranceMinimumStartAge}</div>}
+                                {errors.insuranceMinimumStartAge && <div className="error">{errors.insuranceMinimumStartAge.messages.map((m)=><p>{m}</p>)}</div>}
                             </CalculatorField>
                             <CalculatorField labelText="Enter maximum insurance start age:">
                                 <input type="text" inputMode="numeric" pattern={inputIntegerPattern} name="insuranceMaximumStartAge" value={input.insuranceMaximumStartAge} onChange={handleInput} />
-                                {errors.insuranceMaximumStartAge && <div className="error">{errors.insuranceMaximumStartAge}</div>}
+                                {errors.insuranceMaximumStartAge && <div className="error">{errors.insuranceMaximumStartAge.messages.map((m)=><p>{m}</p>)}</div>}
                             </CalculatorField>
                         </React.Fragment>
                     )}
@@ -158,27 +160,30 @@ function TariffsCalculator({ savedInput, savedErrors, setInput, setErrors }) {
                         input.insuranceType !== "cumulative insurance" ? (
                             <CalculatorField labelText="Enter maximum insurance period:">
                                 <input type="text" inputMode="numeric" pattern={inputIntegerPattern} name="maximumInsurancePeriod" value={input.maximumInsurancePeriod} onChange={handleInput} />
-                                {errors.maximumInsurancePeriod && <div className="error">{errors.maximumInsurancePeriod}</div>}
+                                {errors.maximumInsurancePeriod && <div className="error">{errors.maximumInsurancePeriod.messages.map((m)=><p>{m}</p>)}</div>}
                             </CalculatorField>
                         ) : (
-                            <PeriodFieldGroup
+                            <PeriodFieldGroup                               
                                 labelText="Enter maximum insurance period:"
                                 yearsFieldName="maximumInsurancePeriodYears"
                                 monthsFieldName="maximumInsurancePeriodMonths"
-                                calculatorState={this.state}
-                                handleChange={this.handleChange}
+                                yearsField={input.maximumInsurancePeriodYears}
+                                monthsField={input.maximumInsurancePeriodMonths}
+                                yearsFieldErrors={errors.maximumInsurancePeriodYears}
+                                monthsFieldErrors={errors.maximumInsurancePeriodMonths}
+                                handleChange={handleInput}
                             />
                         )
                     )}
                 </React.Fragment>
-                <CalculatorEndFieldGroup
+                <CalculatorPaymentFieldGroup
                     insurancePremiumRate={input.insurancePremiumRate}
                     insuranceLoading={input.insuranceLoading}
-                    insurancePremiumRateError={input.insurancePremiumRateError}
-                    insuranceLoadingError={input.insuranceLoadingError}
+                    insurancePremiumRateErrors={errors.insurancePremiumRate}
+                    insuranceLoadingErrors={errors.insuranceLoading}
                     handleInput={handleInput}
                 />
-                <button type="submit" disabled={!this.state.isButtonActive} className={!this.state.isButtonActive ? "disabled" : null}>Calculate</button>
+                <button type="submit" disabled={!isButtonActive} className={!isButtonActive ? "disabled" : null}>Calculate</button>
             </form>
         </div>
     );

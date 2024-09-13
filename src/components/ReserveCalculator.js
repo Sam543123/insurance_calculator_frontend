@@ -1,7 +1,11 @@
 import React from "react";
-import CalculatorField from "./CalculatorField.js"
-import commonHandleInput from "../utils/handlers.js"
-import { inputFloatPattern } from "../constants.js"
+import CalculatorTraitFieldGroup from "./CalculatorTraitFieldGroup.js"
+import CalculatorTimeFieldGroup from "./CalculatorTimeFieldGroup.js"
+import CalculatorPaymentFieldGroup from "./CalculatorPaymentFieldGroup.js"
+import PeriodFieldGroup from "./PeriodFieldGroup.js";
+import { inputFloatPattern, API_URL } from "../constants.js"
+import { getBaseValidationErrors, getIntermediateValidationErrors, getButtonState, clearPreviousCommonError } from "../utils.js"
+import axios from "axios";
 
 
 function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, setErrors, setResult }) {
@@ -26,16 +30,13 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
         acc[field] = { messages: [], personalFieldErrors: false };
         return acc;
     }, {})
-    const result = savedResult;
-
-    // const handleInput = (e) => {
-    //     commonHandleInput(e, input, setInput)
-    // }
+    const result = savedResult;   
 
     const validate = (fieldName, updatedInput) => {
         let newErrors = { ...errors, [fieldName]: { messages: [], personalFieldErrors: false } };
         let fieldsToValidate;
         let commonError;
+        let personalFieldInputCorrect;
         newErrors = getBaseValidationErrors(fieldName, updatedInput, newErrors);
         newErrors = getIntermediateValidationErrors(fieldName, updatedInput, newErrors);   
 
@@ -137,29 +138,29 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
     return (
         <div className="App">
             <form onSubmit={handleSubmit} noValidate>
-                <CalculatorStartFieldGroup
+                <CalculatorTraitFieldGroup
                     insuranceType={input.insuranceType}
                     insurancePremiumFrequency={input.insurancePremiumFrequency}
                     gender={input.gender}
                     handleInput={handleInput}
                 />
-                <CalculatorMiddleFieldGroup
+                <CalculatorTimeFieldGroup
                     insuranceType={input.insuranceType}
                     birthDate={input.birthDate}
                     insuranceStartDate={input.insuranceStartDate}
                     insurancePeriodYears={input.insurancePeriodYears}
                     insurancePeriodMonths={input.insurancePeriodMonths}
-                    birthDateError={errors.birthDate}
-                    insuranceStartDateError={errors.insuranceStartDate}
-                    insurancePeriodYearsError={errors.insurancePeriodYearsError}
-                    insurancePeriodMonthsError={errors.insurancePeriodMonthsError}
+                    birthDateErrors={errors.birthDate}
+                    insuranceStartDateErrors={errors.insuranceStartDate}
+                    insurancePeriodYearsErrors={errors.insurancePeriodYears}
+                    insurancePeriodMonthsErrors={errors.insurancePeriodMonths}
                     handleInput={handleInput}
                 />
-                <CalculatorEndFieldGroup
+                <CalculatorPaymentFieldGroup
                     insurancePremiumRate={input.insurancePremiumRate}
                     insuranceLoading={input.insuranceLoading}
-                    insurancePremiumRateError={input.insurancePremiumRateError}
-                    insuranceLoadingError={input.insuranceLoadingError}
+                    insurancePremiumRateErrors={errors.insurancePremiumRate}
+                    insuranceLoadingErrors={errors.insuranceLoading}
                     handleInput={handleInput}
                 />
                 <div className="field-block">
@@ -180,7 +181,7 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
                         onChange={handleInput}
                         disabled={input.inputVariable !== "insurancePremium"}
                     />
-                    {errors.insurancePremium && <div className="error">{errors.insurancePremium}</div>}
+                    {errors.insurancePremium && <div className="error">{errors.insurancePremium.messages.map((m)=><p>{m}</p>)}</div>}
                 </div>
                 <div className="field-block">
                     <input
@@ -200,7 +201,7 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
                         onChange={handleInput}
                         disabled={input.inputVariable !== "insuranceSum"}
                     />
-                    {errors.insuranceSum && <div className="error">{errors.insuranceSum}</div>}
+                    {errors.insuranceSum && <div className="error">{errors.insuranceSum.messages.map((m)=><p>{m}</p>)}</div>}
                 </div>
                 <PeriodFieldGroup
                     labelText="Enter time from insurance start to reserve calculation:"
@@ -208,11 +209,11 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
                     monthsFieldName="reservePeriodMonths"
                     yearsField={input.reservePeriodYears}
                     monthsField={input.reservePeriodMonths}
-                    yearsFieldError={errors.reservePeriodYears}
-                    monthsFieldError={errors.reservePeriodMonths}
+                    yearsFieldErrors={errors.reservePeriodYears}
+                    monthsFieldErrors={errors.reservePeriodMonths}
                     handleChange={handleInput}
                 />
-                <button type="submit" disabled={!this.state.isButtonActive} className={!this.state.isButtonActive ? "disabled" : null}>Calculate</button>
+                <button type="submit" disabled={!isButtonActive} className={!isButtonActive ? "disabled" : null}>Calculate</button>
                 {(input.result) && (
                     <div className="result-display">
                         Reserve={result}

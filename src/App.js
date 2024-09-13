@@ -1,6 +1,9 @@
 import React from 'react';
 import './App.css';
-import BaseCalculator from './components/Calculator.js';
+import PremiumCalculator from './components/PremiumCalculator.js';
+import SumCalculator from './components/SumCalculator.js';
+import ReserveCalculator from './components/ReserveCalculator.js';
+import TariffsCalculator from './components/TariffsCalculator.js';
 
 
 // class App extends React.Component {
@@ -96,7 +99,7 @@ import BaseCalculator from './components/Calculator.js';
 
 function App() {
   const [target, setTarget] = React.useState("insurancePremium")
-  const [premiumCalculatorInput, setPremiumCalculatorInput] = React.useState({null});
+  const [premiumCalculatorInput, setPremiumCalculatorInput] = React.useState(null);
   const [sumCalculatorInput, setSumCalculatorInput] = React.useState(null);
   const [reserveCalculatorInput, setReserveCalculatorInput] = React.useState(null);
   const [tariffsCalculatorInput, setTariffsCalculatorInput] = React.useState(null);
@@ -157,7 +160,7 @@ function App() {
           setResult={setReserveCalculatorResult}
         />
       )}
-      {target === "insurancePremium" && (
+      {target === "tariffs" && (
         <TariffsCalculator
           savedInput={tariffsCalculatorInput}
           savedErrors={tariffsCalculatorErrors}         

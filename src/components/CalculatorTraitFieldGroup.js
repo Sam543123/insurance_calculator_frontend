@@ -2,7 +2,7 @@ import React from "react";
 import CalculatorField from "./CalculatorField.js"
 
 
-function CalculatorStartFieldGroup({ insuranceType, insurancePremiumFrequency, gender, handleInput }) {
+function CalculatorTraitFieldGroup({ insuranceType, insurancePremiumFrequency, gender, handleInput }) {
     return (
         <React.Fragment>
             <CalculatorField labelText="Choose insurance type:">
@@ -30,4 +30,4 @@ function CalculatorStartFieldGroup({ insuranceType, insurancePremiumFrequency, g
     )
 }
 
-export default CalculatorStartFieldGroup;
+export default CalculatorTraitFieldGroup;
