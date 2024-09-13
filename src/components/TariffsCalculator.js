@@ -5,6 +5,7 @@ import { inputIntegerPattern } from "../constants.js"
 
 
 function TariffsCalculator({ savedInput, savedErrors, setInput, setErrors }) {
+    const [isButtonActive, setIsButtonActive] = React.useState(false)
     const input = savedInput || {
         insuranceType: 'pure endowment',
         insurancePremiumFrequency: 'simultaneously',
@@ -18,13 +19,88 @@ function TariffsCalculator({ savedInput, savedErrors, setInput, setErrors }) {
         maximumInsurancePeriodMonths: '',
     }
     const errors = savedErrors || Object.keys(input).reduce((acc, field) => {
-        acc[field] = null;
+        acc[field] = { messages: [], personalFieldErrors: false };
         return acc;
     }, {})
 
-    const handleInput = (e) => {
-        commonHandleInput(e, input, setInput)
+    // const handleInput = (e) => {
+    //     commonHandleInput(e, input, setInput)
+    // }
+
+    const validate = (fieldName, updatedInput) => {
+        let newErrors = { ...errors, [fieldName]: { messages: [], personalFieldErrors: false } };
+        let fieldsToValidate;
+        let commonError;
+        newErrors = getBaseValidationErrors(fieldName, updatedInput, newErrors);       
+
+        fieldsToValidate = ["maximumInsurancePeriodYears", "maximumInsurancePeriodMonths"];
+        if (fieldsToValidate.includes(fieldName)) {                     
+            if (fieldName === "maximumInsurancePeriodMonths") {
+                if (updatedState.maximumInsurancePeriodMonths !== "" && Number(updatedState.maximumInsurancePeriodMonths) > 11) {
+                    newErrors[fieldName].messages.push("Number of months in maximum insurance period must be less than 12.");
+                    newErrors[fieldName].personalFieldErrors=true;
+                }
+            } 
+
+            commonError = "Maximum insurance period must be greater than 0.";
+            clearPreviousCommonError(fieldsToValidate, newErrors, commonError);
+            personalFieldInputCorrect = fieldsToValidate.every((f) => newErrors[f].personalFieldErrors === false && updatedInput[f] !== "");          
+            if (personalFieldInputCorrect) {
+                if (Number(updatedInput.maximumInsurancePeriodYears) === 0 && Number(updatedInput.maximumInsurancePeriodMonths === 0)) {
+                    newErrors[fieldName].messages.push(commonError);
+                }
+            }
+        }
+        fieldsToValidate = ["insuranceMinimumStartAge", "insuranceMaximumStartAge", "maximumInsurancePeriod"];
+        if (fieldsToValidate.includes(fieldName)) {                       
+            if (fieldName === "maximumInsurancePeriod") {
+                if (updatedInput.maximumInsurancePeriod !== "" && Number(updatedInput.maximumInsurancePeriod) <= 0) {
+                    newErrors[fieldName].messages.push("Maximum insurance period must be greater than 0.");
+                    newErrors[fieldName].personalFieldErrors=true;
+                }
+            } else if (fieldName === "insuranceMaximumStartAge") {
+                if (updatedInput.insuranceMaximumStartAge !== "" && Number(updatedInput.insuranceMaximumStartAge) > 100) {
+                    newErrors[fieldName].messages.push("Maximum age of insurance start can't be greater than 100.");
+                    newErrors[fieldName].personalFieldErrors=true;
+                }
+            }
+            fieldsToValidate = ["insuranceMinimumStartAge", "insuranceMaximumStartAge"];
+            commonError = "Minimum age of insurance start can't be greater than maximum age of insurance start.";
+            clearPreviousCommonError(fieldsToValidate, newErrors, commonError);
+            personalFieldInputCorrect = fieldsToValidate.every((f) => newErrors[f].personalFieldErrors === false && updatedInput[f] !== "");
+            if (personalFieldInputCorrect) {
+                if (Number(updatedInput.insuranceMinimumStartAge) > Number(updatedInput.insuranceMaximumStartAge)) {
+                    newErrors[fieldName].messages.push(commonError);
+                }
+            }
+            fieldsToValidate = ["insuranceMaximumStartAge", "maximumInsurancePeriod"];
+            commonError = "Sum of maximum insurance age and maximum insurance period can't be greater than 101 year.";
+            clearPreviousCommonError(fieldsToValidate, newErrors, commonError);
+            personalFieldInputCorrect = fieldsToValidate.every((f) => newErrors[f].personalFieldErrors === false && updatedInput[f] !== "");
+            if (personalFieldInputCorrect) {
+                if (Number(updatedInput.maximumInsurancePeriod) + Number(updatedInput.insuranceMaximumStartAge) > 101) {
+                    newErrors[fieldName].messages.push(commonError);
+                }
+            }            
+        }
+        setErrors(newErrors)
     }
+
+    const handleInput = (e) => {
+        if (!e.target.validity.valid) {
+            return;
+        }
+        const { name, value } = e.target;
+        let updatedInput = { ...input, [name]: value }
+        validate(name, updatedInput)       
+        setInput(updatedInput);
+    }   
+
+    React.useLayoutEffect(()=>{
+       const buttonState = getButtonState(input, errors);
+       setIsButtonActive(buttonState);
+    }, [input, errors])
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();

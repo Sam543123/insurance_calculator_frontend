@@ -4,6 +4,7 @@ import commonHandleInput from "../utils/handlers.js"
 
 
 function SumCalculator({ savedInput, savedErrors, savedResult, setInput, setErrors, setResult }) {
+    const [isButtonActive, setIsButtonActive] = React.useState(false)
     const input = savedInput || {
         insuranceType: 'pure endowment',
         insurancePremiumFrequency: 'simultaneously',
@@ -17,14 +18,44 @@ function SumCalculator({ savedInput, savedErrors, savedResult, setInput, setErro
         insuranceSum: ''
     }
     const errors = savedErrors || Object.keys(input).reduce((acc, field) => {
-        acc[field] = { message: "", isPersonalFieldError: false };
+        acc[field] = { messages: [], personalFieldErrors: false };
         return acc;
     }, {})
     const result = savedResult;
 
     // const handleInput = (e) => {
     //     commonHandleInput(e, input, setInput)
-    // }
+    // }    
+
+    const validate = (fieldName, updatedInput) => {
+        let newErrors = { ...errors, [fieldName]: { messages: [], personalFieldErrors: false } };
+        newErrors = getBaseValidationErrors(fieldName, updatedInput, newErrors);
+        newErrors = getIntermediateValidationErrors(fieldName, updatedInput, newErrors);
+
+        if (fieldName === "insurancePremium") {
+            if (updatedInput.insurancePremium !== "" && updatedInput.insurancePremium < 0) {
+                newErrors[fieldName].messages.push("Insurance premium must be greater than 0.");
+                newErrors[fieldName].personalFieldErrors = true;
+            }
+        }
+
+        setErrors(newErrors)
+    }
+
+    const handleInput = (e) => {
+        if (!e.target.validity.valid) {
+            return;
+        }
+        const { name, value } = e.target;
+        let updatedInput = { ...input, [name]: value }
+        validate(name, updatedInput)
+        setInput(updatedInput);
+    }
+
+    React.useLayoutEffect(() => {
+        const buttonState = getButtonState(input, errors);
+        setIsButtonActive(buttonState);
+    }, [input, errors])
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -54,35 +85,6 @@ function SumCalculator({ savedInput, savedErrors, savedResult, setInput, setErro
             console.error(`Error while sending request to ${routeURL}`, error);
         }
     }
-
-    const validate = (fieldName, updatedInput) => {
-        let newErrors = { ...errors, [fieldName]: null };
-        newErrors = getBaseValidationErrors(fieldName, updatedInput, newErrors);
-        newErrors = getIntermediateValidationErrors(fieldName, updatedInput, newErrors);
-
-        if (fieldName === "insurancePremium") {
-            if (updatedInput.insurancePremium !== "" && updatedInput.insurancePremium < 0) {
-                newErrors[fieldName] = { message: "Insurance premium must be greater than 0.", isPersonalFieldError: true };
-            }
-        }
-
-        setErrors(newErrors)
-    }
-
-    const handleInput = (e) => {
-        if (!e.target.validity.valid) {
-            return;
-        }
-        const { name, value } = e.target;
-        let updatedInput = { ...input, [name]: value }
-        validate(name, updatedInput)
-        setInput(updatedInput);
-    }
-
-    React.useLayoutEffect(() => {
-        const buttonState = getButtonState(input, errors);
-        setIsButtonActive(buttonState);
-    }, [input, errors])
 
 
     return (

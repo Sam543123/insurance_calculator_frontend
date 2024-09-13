@@ -22,24 +22,25 @@ function PremiumCalculator({ savedInput, savedErrors, savedResult, setInput, set
         insurancePremium: ''
     }
     const errors = savedErrors || Object.keys(input).reduce((acc, field) => {
-        acc[field] = { message: "", isPersonalFieldError: false };
+        acc[field] = { messages: [], personalFieldErrors: false };
         return acc;
     }, {})
 
     const result = savedResult;
 
     const validate = (fieldName, updatedInput) => {
-        let newErrors = { ...errors, [fieldName]: null };
+        let newErrors = { ...errors, [fieldName]: { messages: [], personalFieldErrors: false } };
         newErrors = getBaseValidationErrors(fieldName, updatedInput, newErrors);
-        newErrors = getIntermediateValidationErrors(fieldName, updatedInput, newErrors);   
+        newErrors = getIntermediateValidationErrors(fieldName, updatedInput, newErrors);
 
         if (fieldName === "insuranceSum") {
             if (updatedInput.insuranceSum !== "" && updatedInput.insuranceSum < 0) {
-                newErrors[fieldName] = { message: "Insurance sum must be greater than 0.", isPersonalFieldError: true };
+                newErrors[fieldName].messages.push("Insurance sum must be greater than 0.");
+                newErrors[fieldName].personalFieldErrors = true;
             }
-        } 
-        
-        
+        }
+
+
         setErrors(newErrors)
     }
 
@@ -49,13 +50,13 @@ function PremiumCalculator({ savedInput, savedErrors, savedResult, setInput, set
         }
         const { name, value } = e.target;
         let updatedInput = { ...input, [name]: value }
-        validate(name, updatedInput)       
+        validate(name, updatedInput)
         setInput(updatedInput);
-    }   
+    }
 
-    React.useLayoutEffect(()=>{
-       const buttonState = getButtonState(input, errors);
-       setIsButtonActive(buttonState);
+    React.useLayoutEffect(() => {
+        const buttonState = getButtonState(input, errors);
+        setIsButtonActive(buttonState);
     }, [input, errors])
 
     const handleSubmit = async (e) => {

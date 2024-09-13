@@ -5,6 +5,7 @@ import { inputFloatPattern } from "../constants.js"
 
 
 function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, setErrors, setResult }) {
+    const [isButtonActive, setIsButtonActive] = React.useState(false);
     const input = savedInput || {
         insuranceType: 'pure endowment',
         insurancePremiumFrequency: 'simultaneously',
@@ -22,7 +23,7 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
         insurancePremium: ''
     }
     const errors = savedErrors || Object.keys(input).reduce((acc, field) => {
-        acc[field] = null;
+        acc[field] = { messages: [], personalFieldErrors: false };
         return acc;
     }, {})
     const result = savedResult;
@@ -32,7 +33,7 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
     // }
 
     const validate = (fieldName, updatedInput) => {
-        let newErrors = { ...errors, [fieldName]: null };
+        let newErrors = { ...errors, [fieldName]: { messages: [], personalFieldErrors: false } };
         let fieldsToValidate;
         let commonError;
         newErrors = getBaseValidationErrors(fieldName, updatedInput, newErrors);
@@ -40,11 +41,13 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
 
         if (fieldName === "insurancePremium") {
             if (updatedInput.insurancePremium !== "" && updatedInput.insurancePremium < 0) {
-                newErrors[fieldName] = { message: "Insurance premium must be greater than 0.", isPersonalFieldError: true };
+                newErrors[fieldName].messages.push("Insurance premium must be greater than 0.");
+                newErrors[fieldName].personalFieldErrors = true;
             }
         } else if (fieldName === "insuranceSum") {
             if (updatedInput.insuranceSum !== "" && updatedInput.insuranceSum < 0) {
-                newErrors[fieldName] = { message: "Insurance sum must be greater than 0.", isPersonalFieldError: true };
+                newErrors[fieldName].messages.push("Insurance sum must be greater than 0.");
+                newErrors[fieldName].personalFieldErrors = true;
             }
         }
 
@@ -52,15 +55,16 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
         if (fieldsToValidate.includes(fieldName)) {
             if (fieldName === "reservePeriodMonths") {
                 if (updatedInput.reservePeriodMonths !== "" && updatedInput.reservePeriodMonths > 11) {
-                    newErrors[fieldName] = { message: "Number of months in period from insurance start to reserve calculation must be less than 12.", isPersonalFieldError: true };
+                    newErrors[fieldName].messages.push("Number of months in period from insurance start to reserve calculation must be less than 12.");
+                    newErrors[fieldName].personalFieldErrors = true;
                 }
             }    
             commonError = "Period from insurance start to reserve calculation must be greater than 0.";
             clearPreviousCommonError(fieldsToValidate, newErrors, commonError);
-            personalFieldInputCorrect = fieldsToValidate.every((f) => newErrors[f].isPersonalFieldError === false && updatedInput[f] !== "");
+            personalFieldInputCorrect = fieldsToValidate.every((f) => newErrors[f].personalFieldErrors === false && updatedInput[f] !== "");
             if (personalFieldInputCorrect) {
                 if (Number(updatedInput.reservePeriodYears) === 0 && Number(updatedInput.reservePeriodMonths) === 0) {
-                    newErrors[fieldName] = { message: commonError, isPersonalFieldError: false };
+                    newErrors[fieldName].messages.push(commonError);
                 }
             }
         }
@@ -69,10 +73,10 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
         if (fieldsToValidate.includes(fieldName)) {        
             commonError = "Period from insurance start to reserve calculation must be less than insurance period.";
             clearPreviousCommonError(fieldsToValidate, newErrors, commonError);
-            personalFieldInputCorrect = fieldsToValidate.every((f) => newErrors[f].isPersonalFieldError === false && updatedInput[f] !== "");
+            personalFieldInputCorrect = fieldsToValidate.every((f) => newErrors[f].personalFieldErrors === false && updatedInput[f] !== "");
             if (personalFieldInputCorrect) {
-                if (fieldsToValidate.every((v) => updatedInput[v] !== "") && (12 * Number(updatedInput.reservePeriodYears) + Number(updatedInput.reservePeriodMonths)) >= (12 * Number(updatedInput.insurancePeriodYears) + Number(updatedInput.insurancePeriodMonths))) {
-                    newErrors[fieldName] = { message: commonError, isPersonalFieldError: false };
+                if ((12 * Number(updatedInput.reservePeriodYears) + Number(updatedInput.reservePeriodMonths)) >= (12 * Number(updatedInput.insurancePeriodYears) + Number(updatedInput.insurancePeriodMonths))) {
+                    newErrors[fieldName].messages.push(commonError);
                 }
             }
         }
