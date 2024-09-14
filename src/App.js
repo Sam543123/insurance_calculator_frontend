@@ -110,7 +110,7 @@ function App() {
   const [premiumCalculatorResult, setPremiumCalculatorResult] = React.useState(null);
   const [sumCalculatorResult, setSumCalculatorResult] = React.useState(null);
   const [reserveCalculatorResult, setReserveCalculatorResult] = React.useState(null);
-  const targetsDictionary = { premium: "Insurance premium", sum: "Insurance sum", reserve: "Reserve", tariffs: "Tariffs" };
+  const targetsDictionary = { insurancePremium: "Insurance premium", insuranceSum: "Insurance sum", reserve: "Reserve", tariffs: "Tariffs" };
   const handleChooseTarget = (e) => {
     const value = e.target.value;
     setTarget(value);

@@ -11,14 +11,14 @@ function PeriodFieldGroup(props) {
                         years
                     </label>
                     <input type="text" inputMode="numeric" pattern={inputIntegerPattern} name={props.yearsFieldName} value={props.yearsField} onChange={props.handleInput} />
-                    {props.yearsFieldErrors && <div className="error">{props.yearsFieldErrors.messages.map((m) => <p>{m}</p>)}</div>}
+                    {props.yearsFieldErrors && <div className="error">{props.yearsFieldErrors.messages.map((m) => <p key={m}>{m}</p>)}</div>}
                 </div>
                 <div>
                     <label>
                         months
                     </label>
                     <input type="text" inputMode="numeric" pattern={inputIntegerPattern} name={props.monthsFieldName} value={props.monthsField} onChange={props.handleInput} />
-                    {props.monthsFieldErrors && <div className="error">{props.monthsFieldErrors.messages.map((m) => <p>{m}</p>)}</div>}
+                    {props.monthsFieldErrors && <div className="error">{props.monthsFieldErrors.messages.map((m) => <p key={m}>{m}</p>)}</div>}
                 </div>
 
             </div>

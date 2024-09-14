@@ -8,11 +8,11 @@ function CalculatorPaymentFieldGroup({ insuranceLoading, insurancePremiumRate, i
         <React.Fragment>
             <CalculatorField labelText="Enter return rate of insurance premium:">
                 <input type="text" inputMode="numeric" pattern={inputFloatPattern} name="insurancePremiumRate" value={insurancePremiumRate} onChange={handleInput} />
-                {insurancePremiumRateErrors && <div className="error">{insurancePremiumRateErrors.messages.map((m)=><p>{m}</p>)}</div>}
+                {insurancePremiumRateErrors && <div className="error">{insurancePremiumRateErrors.messages.map((m)=><p key={m}>{m}</p>)}</div>}
             </CalculatorField>
             <CalculatorField labelText="Enter loading:">
                 <input type="text" inputMode="numeric" pattern={inputFloatPattern} name="insuranceLoading" value={insuranceLoading} onChange={handleInput} />
-                {insuranceLoadingErrors && <div className="error">{insuranceLoadingErrors.messages.map((m)=><p>{m}</p>)}</div>}
+                {insuranceLoadingErrors && <div className="error">{insuranceLoadingErrors.messages.map((m)=><p key={m}>{m}</p>)}</div>}
             </CalculatorField>
         </React.Fragment>
     )

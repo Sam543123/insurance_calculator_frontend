@@ -55,7 +55,7 @@ function getIntermediateValidationErrors(fieldName, updatedInput, errors) {
         }
 
         fieldsToValidate = ["birthDate", "insuranceStartDate", "insurancePeriodYears", "insurancePeriodMonths"];
-        commonError = "Age of insured person at the end of insurance period can't be more than 101.";
+        commonError = "Age of insured person at the end of insurance period can't be greater than 101.";
         clearPreviousCommonError(fieldsToValidate, newErrors, commonError);
         if (updatedInput.insuranceType !== "cumulative insurance") {
             personalFieldInputCorrect = fieldsToValidate.every((f) => newErrors[f].personalFieldErrors === false && updatedInput[f] !== "");
@@ -90,22 +90,33 @@ function clearPreviousCommonError(fieldsToValidate, errors, commonError) {
 //     setInput(updatedInput);
 // }
 
-function getButtonState(input, errors) {
-    const allFields = Object.keys(input);
-    let excludedFields = [];
-    if (input.insuranceType !== "cumulative insurance") {
-        if (input.insuranceType === "whole life insurance") {
-            excludedFields.push("insurancePeriodYears", "insurancePeriodMonths");
-        }
-    } else {
-        excludedFields.push("birthDate", "insuranceStartDate");
-    }
+// function getButtonState(input, errors) {
+//     const allFields = Object.keys(input);
+//     let excludedFields = [];
+//     if (input.insuranceType !== "cumulative insurance") {
+//         if (input.insuranceType === "whole life insurance") {
+//             excludedFields.push("insurancePeriodYears", "insurancePeriodMonths");
+//         }
+//     } else {
+//         excludedFields.push("birthDate", "insuranceStartDate");
+//     }
     
-    const trackedFields = allFields.filter((v) => !excludedFields.includes(v));   
-    if (trackedFields.every((v) => input[v] !== "") && trackedFields.every((v) => errors[v].messages.length === 0)) {       
-        return true;
-    }
-    return false;
+//     const trackedFields = allFields.filter((v) => !excludedFields.includes(v));   
+//     if (trackedFields.every((v) => input[v] !== "") && trackedFields.every((v) => errors[v].messages.length === 0)) {       
+//         return true;
+//     }
+//     return false;
+// }
+
+function getCommonExcludedFields(input) {   
+    let excludedFields = [];
+    if (input.insuranceType === "cumulative insurance") {
+        excludedFields.push("birthDate", "insuranceStartDate");
+    } else if (input.insuranceType === "whole life insurance") {
+        excludedFields.push("insurancePeriodYears", "insurancePeriodMonths");
+    }   
+
+    return excludedFields;
 }
 
-export { clearPreviousCommonError, getBaseValidationErrors, getIntermediateValidationErrors, getButtonState };
+export { clearPreviousCommonError, getBaseValidationErrors, getIntermediateValidationErrors, getCommonExcludedFields };

@@ -4,7 +4,7 @@ import CalculatorTimeFieldGroup from "./CalculatorTimeFieldGroup.js"
 import CalculatorPaymentFieldGroup from "./CalculatorPaymentFieldGroup.js"
 import PeriodFieldGroup from "./PeriodFieldGroup.js";
 import { inputFloatPattern, API_URL } from "../constants.js"
-import { getBaseValidationErrors, getIntermediateValidationErrors, getButtonState, clearPreviousCommonError } from "../utils.js"
+import { getBaseValidationErrors, getIntermediateValidationErrors, getCommonExcludedFields, clearPreviousCommonError } from "../utils.js"
 import axios from "axios";
 
 
@@ -41,12 +41,12 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
         newErrors = getIntermediateValidationErrors(fieldName, updatedInput, newErrors);   
 
         if (fieldName === "insurancePremium") {
-            if (updatedInput.insurancePremium !== "" && updatedInput.insurancePremium < 0) {
+            if (updatedInput.insurancePremium !== "" && updatedInput.insurancePremium <= 0) {
                 newErrors[fieldName].messages.push("Insurance premium must be greater than 0.");
                 newErrors[fieldName].personalFieldErrors = true;
             }
         } else if (fieldName === "insuranceSum") {
-            if (updatedInput.insuranceSum !== "" && updatedInput.insuranceSum < 0) {
+            if (updatedInput.insuranceSum !== "" && updatedInput.insuranceSum <= 0) {
                 newErrors[fieldName].messages.push("Insurance sum must be greater than 0.");
                 newErrors[fieldName].personalFieldErrors = true;
             }
@@ -94,10 +94,24 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
         setInput(updatedInput);
     }   
 
-    React.useLayoutEffect(()=>{
-       const buttonState = getButtonState(input, errors);
-       setIsButtonActive(buttonState);
+    React.useLayoutEffect(() => {
+        const allFields = Object.keys(input);
+        let buttonState = false;
+        let excludedFields = getCommonExcludedFields(input);        
+
+        if (input.inputVariable === "insurancePremium") {
+            excludedFields.push("insuranceSum");
+        } else if (input.inputVariable === "insuranceSum") {
+            excludedFields.push("insurancePremium");
+        }      
+        
+        const trackedFields = allFields.filter((v) => !excludedFields.includes(v));   
+        if (trackedFields.every((v) => input[v] !== "") && trackedFields.every((v) => errors[v].messages.length === 0)) {       
+            buttonState = true;
+        }
+        setIsButtonActive(buttonState);
     }, [input, errors])
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -181,7 +195,7 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
                         onChange={handleInput}
                         disabled={input.inputVariable !== "insurancePremium"}
                     />
-                    {errors.insurancePremium && <div className="error">{errors.insurancePremium.messages.map((m)=><p>{m}</p>)}</div>}
+                    {errors.insurancePremium && <div className="error">{errors.insurancePremium.messages.map((m)=><p key={m}>{m}</p>)}</div>}
                 </div>
                 <div className="field-block">
                     <input
@@ -201,7 +215,7 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
                         onChange={handleInput}
                         disabled={input.inputVariable !== "insuranceSum"}
                     />
-                    {errors.insuranceSum && <div className="error">{errors.insuranceSum.messages.map((m)=><p>{m}</p>)}</div>}
+                    {errors.insuranceSum && <div className="error">{errors.insuranceSum.messages.map((m)=><p key={m}>{m}</p>)}</div>}
                 </div>
                 <PeriodFieldGroup
                     labelText="Enter time from insurance start to reserve calculation:"
@@ -211,7 +225,7 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
                     monthsField={input.reservePeriodMonths}
                     yearsFieldErrors={errors.reservePeriodYears}
                     monthsFieldErrors={errors.reservePeriodMonths}
-                    handleChange={handleInput}
+                    handleInput={handleInput}
                 />
                 <button type="submit" disabled={!isButtonActive} className={!isButtonActive ? "disabled" : null}>Calculate</button>
                 {(input.result) && (

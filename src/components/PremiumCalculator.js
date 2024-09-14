@@ -3,7 +3,7 @@ import CalculatorField from "./CalculatorField.js"
 import CalculatorTraitFieldGroup from "./CalculatorTraitFieldGroup.js"
 import CalculatorTimeFieldGroup from "./CalculatorTimeFieldGroup.js"
 import CalculatorPaymentFieldGroup from "./CalculatorPaymentFieldGroup.js"
-import { getBaseValidationErrors, getIntermediateValidationErrors, getButtonState } from "../utils.js"
+import { getBaseValidationErrors, getIntermediateValidationErrors, getCommonExcludedFields } from "../utils.js"
 import { inputFloatPattern, API_URL } from "../constants.js"
 import axios from "axios";
 
@@ -36,7 +36,7 @@ function PremiumCalculator({ savedInput, savedErrors, savedResult, setInput, set
         newErrors = getIntermediateValidationErrors(fieldName, updatedInput, newErrors);
 
         if (fieldName === "insuranceSum") {
-            if (updatedInput.insuranceSum !== "" && updatedInput.insuranceSum < 0) {
+            if (updatedInput.insuranceSum !== "" && updatedInput.insuranceSum <= 0) {
                 newErrors[fieldName].messages.push("Insurance sum must be greater than 0.");
                 newErrors[fieldName].personalFieldErrors = true;
             }
@@ -55,7 +55,14 @@ function PremiumCalculator({ savedInput, savedErrors, savedResult, setInput, set
     }
 
     React.useLayoutEffect(() => {
-        const buttonState = getButtonState(input, errors);
+        const allFields = Object.keys(input);
+        let buttonState = false;
+        let excludedFields = getCommonExcludedFields(input);
+        
+        const trackedFields = allFields.filter((v) => !excludedFields.includes(v));   
+        if (trackedFields.every((v) => input[v] !== "") && trackedFields.every((v) => errors[v].messages.length === 0)) {       
+            buttonState = true;
+        }
         setIsButtonActive(buttonState);
     }, [input, errors])
 
@@ -118,7 +125,7 @@ function PremiumCalculator({ savedInput, savedErrors, savedResult, setInput, set
                 />
                 <CalculatorField labelText="Enter insurance sum:">
                     <input type="text" inputMode="numeric" pattern={inputFloatPattern} name="insuranceSum" value={input.insuranceSum} onChange={handleInput} />
-                    {errors.insuranceSum && <div className="error">{errors.insuranceSum.messages.map((m)=><p>{m}</p>)}</div>}
+                    {errors.insuranceSum && <div className="error">{errors.insuranceSum.messages.map((m)=><p key={m}>{m}</p>)}</div>}
                 </CalculatorField>
                 <button type="submit" disabled={!isButtonActive} className={!isButtonActive ? "disabled" : null}>Calculate</button>
                 {(result) && (
