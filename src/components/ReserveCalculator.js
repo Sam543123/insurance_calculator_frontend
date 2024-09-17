@@ -1,15 +1,16 @@
 import React from "react";
-import CalculatorTraitFieldGroup from "./CalculatorTraitFieldGroup.js"
-import CalculatorTimeFieldGroup from "./CalculatorTimeFieldGroup.js"
-import CalculatorPaymentFieldGroup from "./CalculatorPaymentFieldGroup.js"
+import CalculatorTraitFieldGroup from "./CalculatorTraitFieldGroup.js";
+import CalculatorTimeFieldGroup from "./CalculatorTimeFieldGroup.js";
+import CalculatorPaymentFieldGroup from "./CalculatorPaymentFieldGroup.js";
 import PeriodFieldGroup from "./PeriodFieldGroup.js";
-import { inputFloatPattern, API_URL } from "../constants.js"
-import { getBaseValidationErrors, getIntermediateValidationErrors, getCommonExcludedFields, clearPreviousCommonError } from "../utils.js"
+import { inputFloatPattern, API_URL } from "../constants.js";
+import { getBaseErrors, getCommonErrors, getCommonExcludedFields, clearPreviousCommonError, commonHandleInput } from "../utils.js";
+import { useToggleButton } from "../hooks.js";
 import axios from "axios";
 
 
 function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, setErrors, setResult }) {
-    const [isButtonActive, setIsButtonActive] = React.useState(false);
+    // const [isButtonActive, setIsButtonActive] = React.useState(false);
     const input = savedInput || {
         insuranceType: 'pure endowment',
         insurancePremiumFrequency: 'simultaneously',
@@ -30,23 +31,34 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
         acc[field] = { messages: [], personalFieldErrors: false };
         return acc;
     }, {})
-    const result = savedResult;   
+    const result = savedResult; 
+
+    const getExcludedFields = React.useCallback(() => {
+        let excludedFields = getCommonExcludedFields(input);    
+        if (input.inputVariable === "insurancePremium") {
+            excludedFields.push("insuranceSum");
+        } else if (input.inputVariable === "insuranceSum") {
+            excludedFields.push("insurancePremium");
+        }     
+        return excludedFields
+    }, [input])
+    const isButtonActive = useToggleButton(input, errors, getExcludedFields);
 
     const validate = (fieldName, updatedInput) => {
         let newErrors = { ...errors, [fieldName]: { messages: [], personalFieldErrors: false } };
         let fieldsToValidate;
         let commonError;
         let personalFieldInputCorrect;
-        newErrors = getBaseValidationErrors(fieldName, updatedInput, newErrors);
-        newErrors = getIntermediateValidationErrors(fieldName, updatedInput, newErrors);   
+        newErrors = getBaseErrors(fieldName, updatedInput, newErrors);
+        newErrors = getCommonErrors(fieldName, updatedInput, newErrors);   
 
         if (fieldName === "insurancePremium") {
-            if (updatedInput.insurancePremium !== "" && updatedInput.insurancePremium <= 0) {
+            if (updatedInput.insurancePremium !== "" && Number(updatedInput.insurancePremium) <= 0) {
                 newErrors[fieldName].messages.push("Insurance premium must be greater than 0.");
                 newErrors[fieldName].personalFieldErrors = true;
             }
         } else if (fieldName === "insuranceSum") {
-            if (updatedInput.insuranceSum !== "" && updatedInput.insuranceSum <= 0) {
+            if (updatedInput.insuranceSum !== "" && Number(updatedInput.insuranceSum) <= 0) {
                 newErrors[fieldName].messages.push("Insurance sum must be greater than 0.");
                 newErrors[fieldName].personalFieldErrors = true;
             }
@@ -81,36 +93,41 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
                 }
             }
         }
-        setErrors(newErrors)
+        return newErrors;
     }
 
+    // const handleInput = (e) => {       
+    //     if (!e.target.validity.valid) {
+    //         return;
+    //     }
+    //     const { name, value } = e.target;
+    //     const updatedInput = { ...input, [name]: value }
+    //     const newErrors = validate(name, updatedInput)
+    //     setInput(updatedInput);
+    //     setErrors(newErrors);       
+    // }
+
     const handleInput = (e) => {
-        if (!e.target.validity.valid) {
-            return;
-        }
-        const { name, value } = e.target;
-        let updatedInput = { ...input, [name]: value }
-        validate(name, updatedInput)       
-        setInput(updatedInput);
-    }   
+        commonHandleInput(e, input, validate, setInput, setErrors);
+    };
 
-    React.useLayoutEffect(() => {
-        const allFields = Object.keys(input);
-        let buttonState = false;
-        let excludedFields = getCommonExcludedFields(input);        
+    // React.useLayoutEffect(() => {
+    //     const allFields = Object.keys(input);
+    //     let buttonState = false;
+    //     let excludedFields = getCommonExcludedFields(input);        
 
-        if (input.inputVariable === "insurancePremium") {
-            excludedFields.push("insuranceSum");
-        } else if (input.inputVariable === "insuranceSum") {
-            excludedFields.push("insurancePremium");
-        }      
+        // if (input.inputVariable === "insurancePremium") {
+        //     excludedFields.push("insuranceSum");
+        // } else if (input.inputVariable === "insuranceSum") {
+        //     excludedFields.push("insurancePremium");
+        // }      
         
-        const trackedFields = allFields.filter((v) => !excludedFields.includes(v));   
-        if (trackedFields.every((v) => input[v] !== "") && trackedFields.every((v) => errors[v].messages.length === 0)) {       
-            buttonState = true;
-        }
-        setIsButtonActive(buttonState);
-    }, [input, errors])
+    //     const trackedFields = allFields.filter((v) => !excludedFields.includes(v));   
+    //     if (trackedFields.every((v) => input[v] !== "") && trackedFields.every((v) => errors[v].messages.length === 0)) {       
+    //         buttonState = true;
+    //     }
+    //     setIsButtonActive(buttonState);
+    // }, [input, errors])
 
 
     const handleSubmit = async (e) => {

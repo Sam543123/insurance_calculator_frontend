@@ -1,24 +1,25 @@
 import React from "react";
-import CalculatorField from "./CalculatorField.js"
-import CalculatorTraitFieldGroup from "./CalculatorTraitFieldGroup.js"
-import CalculatorPaymentFieldGroup from "./CalculatorPaymentFieldGroup.js"
+import CalculatorField from "./CalculatorField.js";
+import CalculatorTraitFieldGroup from "./CalculatorTraitFieldGroup.js";
+import CalculatorPaymentFieldGroup from "./CalculatorPaymentFieldGroup.js";
 import PeriodFieldGroup from "./PeriodFieldGroup.js";
-import { inputIntegerPattern, API_URL } from "../constants.js"
-import { getBaseValidationErrors, clearPreviousCommonError } from "../utils.js"
+import { inputIntegerPattern, API_URL } from "../constants.js";
+import { getBaseErrors, clearPreviousCommonError, commonHandleInput } from "../utils.js";
+import { useToggleButton } from "../hooks.js";
 import axios from "axios";
 import { saveAs } from "file-saver";
 
 
 function TariffsCalculator({ savedInput, savedErrors, setInput, setErrors }) {
-    const [isButtonActive, setIsButtonActive] = React.useState(false)
+    // const [isButtonActive, setIsButtonActive] = React.useState(false)
     const input = savedInput || {
         insuranceType: 'pure endowment',
         insurancePremiumFrequency: 'simultaneously',
         gender: 'male',
         insurancePremiumRate: '',
         insuranceLoading: '',
-        insuranceMinimumStartAge: '',
-        insuranceMaximumStartAge: '',
+        minimumInsuranceStartAge: '',
+        maximumInsuranceStartAge: '',
         maximumInsurancePeriod: '',
         maximumInsurancePeriodYears: '',
         maximumInsurancePeriodMonths: '',
@@ -28,12 +29,24 @@ function TariffsCalculator({ savedInput, savedErrors, setInput, setErrors }) {
         return acc;
     }, {})
 
+    const getExcludedFields = React.useCallback(() => {
+        let excludedFields = getCommonExcludedFields(input);
+        if (input.insuranceType !== "cumulative insurance") {
+            excludedFields.push("maximumInsurancePeriodMonths", "maximumInsurancePeriodYears");
+            if (input.insuranceType === "whole life insurance") {
+                excludedFields.push("maximumInsurancePeriod");
+            }
+        }
+        return excludedFields
+    }, [input])
+    const isButtonActive = useToggleButton(input, errors, getExcludedFields);
+
     const validate = (fieldName, updatedInput) => {
         let newErrors = { ...errors, [fieldName]: { messages: [], personalFieldErrors: false } };
         let fieldsToValidate;
         let commonError;
         let personalFieldInputCorrect;
-        newErrors = getBaseValidationErrors(fieldName, updatedInput, newErrors);
+        newErrors = getBaseErrors(fieldName, updatedInput, newErrors);
 
         fieldsToValidate = ["maximumInsurancePeriodYears", "maximumInsurancePeriodMonths"];
         if (fieldsToValidate.includes(fieldName)) {
@@ -48,79 +61,82 @@ function TariffsCalculator({ savedInput, savedErrors, setInput, setErrors }) {
             clearPreviousCommonError(fieldsToValidate, newErrors, commonError);
             personalFieldInputCorrect = fieldsToValidate.every((f) => newErrors[f].personalFieldErrors === false && updatedInput[f] !== "");
             if (personalFieldInputCorrect) {
-                if (Number(updatedInput.maximumInsurancePeriodYears) === 0 && Number(updatedInput.maximumInsurancePeriodMonths === 0)) {
+                if (Number(updatedInput.maximumInsurancePeriodYears) === 0 && Number(updatedInput.maximumInsurancePeriodMonths) === 0) {
                     newErrors[fieldName].messages.push(commonError);
                 }
             }
         }
-        fieldsToValidate = ["insuranceMinimumStartAge", "insuranceMaximumStartAge", "maximumInsurancePeriod"];
+
+        fieldsToValidate = ["maximumInsuranceStartAge", "maximumInsurancePeriod"];
         if (fieldsToValidate.includes(fieldName)) {
             if (fieldName === "maximumInsurancePeriod") {
                 if (updatedInput.maximumInsurancePeriod !== "" && Number(updatedInput.maximumInsurancePeriod) <= 0) {
                     newErrors[fieldName].messages.push("Maximum insurance period must be greater than 0.");
                     newErrors[fieldName].personalFieldErrors = true;
                 }
-            } else if (fieldName === "insuranceMaximumStartAge") {
-                if (updatedInput.insuranceMaximumStartAge !== "" && Number(updatedInput.insuranceMaximumStartAge) > 100) {
+            } else if (fieldName === "maximumInsuranceStartAge") {
+                if (updatedInput.maximumInsuranceStartAge !== "" && Number(updatedInput.maximumInsuranceStartAge) > 100) {
                     newErrors[fieldName].messages.push("Maximum age of insurance start can't be greater than 100.");
                     newErrors[fieldName].personalFieldErrors = true;
                 }
             }
-            fieldsToValidate = ["insuranceMinimumStartAge", "insuranceMaximumStartAge"];
-            if (fieldsToValidate.includes(fieldName)) {
-                commonError = "Minimum age of insurance start can't be greater than maximum age of insurance start.";
-                clearPreviousCommonError(fieldsToValidate, newErrors, commonError);
-                personalFieldInputCorrect = fieldsToValidate.every((f) => newErrors[f].personalFieldErrors === false && updatedInput[f] !== "");
-                if (personalFieldInputCorrect) {
-                    if (Number(updatedInput.insuranceMinimumStartAge) > Number(updatedInput.insuranceMaximumStartAge)) {
-                        newErrors[fieldName].messages.push(commonError);
-                    }
-                }
-            }
-
-            fieldsToValidate = ["insuranceMaximumStartAge", "maximumInsurancePeriod"];
-            if (fieldsToValidate.includes(fieldName)) {
-                commonError = "Sum of maximum insurance age and maximum insurance period can't be greater than 101 year.";
-                clearPreviousCommonError(fieldsToValidate, newErrors, commonError);
-                personalFieldInputCorrect = fieldsToValidate.every((f) => newErrors[f].personalFieldErrors === false && updatedInput[f] !== "");
-                if (personalFieldInputCorrect) {
-                    if (Number(updatedInput.maximumInsurancePeriod) + Number(updatedInput.insuranceMaximumStartAge) > 101) {
-                        newErrors[fieldName].messages.push(commonError);
-                    }
+            commonError = "Sum of maximum insurance age and maximum insurance period can't be greater than 101 year.";
+            clearPreviousCommonError(fieldsToValidate, newErrors, commonError);
+            personalFieldInputCorrect = fieldsToValidate.every((f) => newErrors[f].personalFieldErrors === false && updatedInput[f] !== "");
+            if (personalFieldInputCorrect) {
+                if (Number(updatedInput.maximumInsurancePeriod) + Number(updatedInput.maximumInsuranceStartAge) > 101) {
+                    newErrors[fieldName].messages.push(commonError);
                 }
             }
         }
-        setErrors(newErrors)
+
+        fieldsToValidate = ["minimumInsuranceStartAge", "maximumInsuranceStartAge"];
+        if (fieldsToValidate.includes(fieldName)) {
+            commonError = "Minimum age of insurance start can't be greater than maximum age of insurance start.";
+            clearPreviousCommonError(fieldsToValidate, newErrors, commonError);
+            personalFieldInputCorrect = fieldsToValidate.every((f) => newErrors[f].personalFieldErrors === false && updatedInput[f] !== "");
+            if (personalFieldInputCorrect) {
+                if (Number(updatedInput.minimumInsuranceStartAge) > Number(updatedInput.maximumInsuranceStartAge)) {
+                    newErrors[fieldName].messages.push(commonError);
+                }
+            }
+        }
+        return newErrors;
     }
+
+    // const handleInput = (e) => {       
+    //     if (!e.target.validity.valid) {
+    //         return;
+    //     }
+    //     const { name, value } = e.target;
+    //     const updatedInput = { ...input, [name]: value }
+    //     const newErrors = validate(name, updatedInput)
+    //     setInput(updatedInput);
+    //     setErrors(newErrors);       
+    // }
 
     const handleInput = (e) => {
-        if (!e.target.validity.valid) {
-            return;
-        }
-        const { name, value } = e.target;
-        let updatedInput = { ...input, [name]: value }
-        validate(name, updatedInput)
-        setInput(updatedInput);
-    }
+        commonHandleInput(e, input, validate, setInput, setErrors);
+    };
 
 
-    React.useLayoutEffect(() => {
-        let buttonState = false;
-        const allFields = Object.keys(input);
-        let excludedFields = [];
-        if (input.insuranceType !== "cumulative insurance") {
-            excludedFields.push("maximumInsurancePeriodMonths", "maximumInsurancePeriodYears");
-            if (input.insuranceType === "whole life insurance") {
-                excludedFields.push("maximumInsurancePeriod");
-            }
-        }
+    // React.useLayoutEffect(() => {
+    //     let buttonState = false;
+    //     const allFields = Object.keys(input);
+    //     let excludedFields = [];
+    //     if (input.insuranceType !== "cumulative insurance") {
+    //         excludedFields.push("maximumInsurancePeriodMonths", "maximumInsurancePeriodYears");
+    //         if (input.insuranceType === "whole life insurance") {
+    //             excludedFields.push("maximumInsurancePeriod");
+    //         }
+    //     }
 
-        const trackedFields = allFields.filter((v) => !excludedFields.includes(v));
-        if (trackedFields.every((v) => input[v] !== "") && trackedFields.every((v) => errors[v].messages.length === 0)) {
-            buttonState = true;
-        }
-        setIsButtonActive(buttonState);
-    }, [input, errors])
+    //     const trackedFields = allFields.filter((v) => !excludedFields.includes(v));
+    //     if (trackedFields.every((v) => input[v] !== "") && trackedFields.every((v) => errors[v].messages.length === 0)) {
+    //         buttonState = true;
+    //     }
+    //     setIsButtonActive(buttonState);
+    // }, [input, errors])
 
 
     const handleSubmit = async (e) => {
@@ -131,11 +147,11 @@ function TariffsCalculator({ savedInput, savedErrors, setInput, setErrors }) {
             insurancePremiumFrequency: input.insurancePremiumFrequency,
             gender: input.gender,
             insurancePremiumRate: input.insurancePremiumRate,
-            insuranceLoading: input.insuranceLoading
+            insuranceLoading: input.insuranceLoading,
+            minimumInsuranceStartAge: input.minimumInsuranceStartAge,
+            maximumInsuranceStartAge: input.maximumInsuranceStartAge
         };
 
-        requestData.insuranceMinimumStartAge = input.insuranceStartAge;
-        requestData.insuranceMaximumStartAge = input.insuranceEndAge;
         if (input.insuranceType !== "cumulative insurance") {
             requestData.maximumInsurancePeriod = 12 * Number(input.maximumInsurancePeriod);
         } else {
@@ -165,12 +181,12 @@ function TariffsCalculator({ savedInput, savedErrors, setInput, setErrors }) {
                     {input.insuranceType !== "cumulative insurance" && (
                         <React.Fragment>
                             <CalculatorField labelText="Enter minimum insurance start age:">
-                                <input type="text" inputMode="numeric" pattern={inputIntegerPattern} name="insuranceMinimumStartAge" value={input.insuranceMinimumStartAge} onChange={handleInput} />
-                                {errors.insuranceMinimumStartAge && <div className="error">{errors.insuranceMinimumStartAge.messages.map((m) => <p key={m}>{m}</p>)}</div>}
+                                <input type="text" inputMode="numeric" pattern={inputIntegerPattern} name="minimumInsuranceStartAge" value={input.minimumInsuranceStartAge} onChange={handleInput} />
+                                {errors.minimumInsuranceStartAge && <div className="error">{errors.minimumInsuranceStartAge.messages.map((m) => <p key={m}>{m}</p>)}</div>}
                             </CalculatorField>
                             <CalculatorField labelText="Enter maximum insurance start age:">
-                                <input type="text" inputMode="numeric" pattern={inputIntegerPattern} name="insuranceMaximumStartAge" value={input.insuranceMaximumStartAge} onChange={handleInput} />
-                                {errors.insuranceMaximumStartAge && <div className="error">{errors.insuranceMaximumStartAge.messages.map((m) => <p key={m}>{m}</p>)}</div>}
+                                <input type="text" inputMode="numeric" pattern={inputIntegerPattern} name="maximumInsuranceStartAge" value={input.maximumInsuranceStartAge} onChange={handleInput} />
+                                {errors.maximumInsuranceStartAge && <div className="error">{errors.maximumInsuranceStartAge.messages.map((m) => <p key={m}>{m}</p>)}</div>}
                             </CalculatorField>
                         </React.Fragment>
                     )}

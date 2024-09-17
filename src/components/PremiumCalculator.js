@@ -3,14 +3,16 @@ import CalculatorField from "./CalculatorField.js"
 import CalculatorTraitFieldGroup from "./CalculatorTraitFieldGroup.js"
 import CalculatorTimeFieldGroup from "./CalculatorTimeFieldGroup.js"
 import CalculatorPaymentFieldGroup from "./CalculatorPaymentFieldGroup.js"
-import { getBaseValidationErrors, getIntermediateValidationErrors, getCommonExcludedFields } from "../utils.js"
+import { getBaseErrors, getCommonErrors, getCommonExcludedFields, commonHandleInput } from "../utils.js"
+import { useToggleButton } from "../hooks.js"
 import { inputFloatPattern, API_URL } from "../constants.js"
 import axios from "axios";
 
 
 
 function PremiumCalculator({ savedInput, savedErrors, savedResult, setInput, setErrors, setResult }) {
-    const [isButtonActive, setIsButtonActive] = React.useState(false)
+   
+    // const [isButtonActive, setIsButtonActive] = React.useState(false)
     const input = savedInput || {
         insuranceType: 'pure endowment',
         insurancePremiumFrequency: 'simultaneously',
@@ -27,44 +29,50 @@ function PremiumCalculator({ savedInput, savedErrors, savedResult, setInput, set
         acc[field] = { messages: [], personalFieldErrors: false };
         return acc;
     }, {})
+    const isButtonActive = useToggleButton(input, errors, getCommonExcludedFields);
 
     const result = savedResult;
 
     const validate = (fieldName, updatedInput) => {
         let newErrors = { ...errors, [fieldName]: { messages: [], personalFieldErrors: false } };
-        newErrors = getBaseValidationErrors(fieldName, updatedInput, newErrors);
-        newErrors = getIntermediateValidationErrors(fieldName, updatedInput, newErrors);
+        newErrors = getBaseErrors(fieldName, updatedInput, newErrors);
+        newErrors = getCommonErrors(fieldName, updatedInput, newErrors);
 
         if (fieldName === "insuranceSum") {
-            if (updatedInput.insuranceSum !== "" && updatedInput.insuranceSum <= 0) {
+            if (updatedInput.insuranceSum !== "" && Number(updatedInput.insuranceSum) <= 0) {
                 newErrors[fieldName].messages.push("Insurance sum must be greater than 0.");
                 newErrors[fieldName].personalFieldErrors = true;
             }
         }
-        setErrors(newErrors);
+        return newErrors;
     }
 
-    const handleInput = (e) => {       
-        if (!e.target.validity.valid) {
-            return;
-        }
-        const { name, value } = e.target;
-        let updatedInput = { ...input, [name]: value }
-        validate(name, updatedInput)
-        setInput(updatedInput);       
-    }
+    // const handleInput = (e) => {       
+    //     if (!e.target.validity.valid) {
+    //         return;
+    //     }
+    //     const { name, value } = e.target;
+    //     const updatedInput = { ...input, [name]: value }
+    //     const newErrors = validate(name, updatedInput)
+    //     setInput(updatedInput);
+    //     setErrors(newErrors);       
+    // }
 
-    React.useLayoutEffect(() => {
-        const allFields = Object.keys(input);
-        let buttonState = false;
-        let excludedFields = getCommonExcludedFields(input);
+    const handleInput = (e) => {
+        commonHandleInput(e, input, validate, setInput, setErrors);
+    };
+
+    // React.useLayoutEffect(() => {
+    //     const allFields = Object.keys(input);
+    //     let buttonState = false;
+    //     let excludedFields = getCommonExcludedFields(input);
         
-        const trackedFields = allFields.filter((v) => !excludedFields.includes(v));   
-        if (trackedFields.every((v) => input[v] !== "") && trackedFields.every((v) => errors[v].messages.length === 0)) {       
-            buttonState = true;
-        }
-        setIsButtonActive(buttonState);
-    }, [input, errors])
+    //     const trackedFields = allFields.filter((v) => !excludedFields.includes(v));   
+    //     if (trackedFields.every((v) => input[v] !== "") && trackedFields.every((v) => errors[v].messages.length === 0)) {       
+    //         buttonState = true;
+    //     }
+    //     setIsButtonActive(buttonState);
+    // }, [input, errors])
 
     const handleSubmit = async (e) => {
         e.preventDefault();
