@@ -147,13 +147,13 @@ function TariffsCalculator({ savedInput, savedErrors, setInput, setErrors }) {
             insurancePremiumFrequency: input.insurancePremiumFrequency,
             gender: input.gender,
             insurancePremiumRate: input.insurancePremiumRate,
-            insuranceLoading: input.insuranceLoading,
-            minimumInsuranceStartAge: input.minimumInsuranceStartAge,
-            maximumInsuranceStartAge: input.maximumInsuranceStartAge
+            insuranceLoading: input.insuranceLoading
         };
 
         if (input.insuranceType !== "cumulative insurance") {
             requestData.maximumInsurancePeriod = 12 * Number(input.maximumInsurancePeriod);
+            requestData.minimumInsuranceStartAge = input.minimumInsuranceStartAge;
+            requestData.maximumInsuranceStartAge = input.maximumInsuranceStartAge;
         } else {
             requestData.maximumInsurancePeriod = 12 * Number(input.maximumInsurancePeriodYears) + Number(input.maximumInsurancePeriodMonths);
         }
