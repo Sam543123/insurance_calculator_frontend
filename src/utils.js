@@ -4,7 +4,7 @@ function getBaseErrors(fieldName, updatedInput, errors) {
     let newErrors = { ...errors };
     if (fieldName === "insuranceLoading") {
         if (updatedInput.insuranceLoading !== "" && Number(updatedInput.insuranceLoading) >= 1) {
-            newErrors[fieldName].messages.push("Insurance loading must be less than 1.");
+            newErrors[fieldName].fieldErrors.push({ message: "Insurance loading must be less than 1.", excludedInsuranceTypes: [] });
             newErrors[fieldName].personalFieldErrors = true;
         }
     }
@@ -13,24 +13,31 @@ function getBaseErrors(fieldName, updatedInput, errors) {
 
 function getCommonErrors(fieldName, updatedInput, errors) {
     let newErrors = { ...errors };
-    let commonError;
+    let commonErrorMessage;
     let personalFieldInputCorrect;
+    let previousCommonErrorField;
     const currentDate = new Date();
     let fieldsToValidate = ["birthDate", "insuranceStartDate"];
     if (fieldsToValidate.includes(fieldName)) {
         if (fieldName === "birthDate") {
             if (updatedInput.birthDate !== "" && Date.parse(updatedInput.birthDate) > currentDate) {
-                newErrors[fieldName].messages.push("Birth date can't be later than current moment.");
+                newErrors[fieldName].fieldErrors.push({ message: "Birth date can't be later than current moment.", excludedInsuranceTypes: ["cumulative insurance"] });
                 newErrors[fieldName].personalFieldErrors = true;
             }
         }
-        commonError = "Birth date can't be later than insurance start date."
-        clearPreviousCommonError(fieldsToValidate, newErrors, commonError);
+        commonErrorMessage = "Birth date can't be later than insurance start date."
+        previousCommonErrorField = findPreviousCommonError(fieldsToValidate, newErrors, commonErrorMessage);
         personalFieldInputCorrect = fieldsToValidate.every((f) => newErrors[f].personalFieldErrors === false && updatedInput[f] !== "");
         if (personalFieldInputCorrect) {
             if (Date.parse(updatedInput.birthDate) > Date.parse(updatedInput.insuranceStartDate)) {
-                newErrors[fieldName].messages.push(commonError);
+                if (previousCommonErrorField === null) {
+                    newErrors[fieldName].fieldErrors.push({ message: commonErrorMessage, excludedInsuranceTypes: ["cumulative insurance"] });
+                }
+            } else {
+                removeError(previousCommonErrorField, newErrors, commonErrorMessage);
             }
+        } else {
+            removeError(previousCommonErrorField, newErrors, commonErrorMessage);
         }
 
     }
@@ -38,45 +45,71 @@ function getCommonErrors(fieldName, updatedInput, errors) {
     if (fieldsToValidate.includes(fieldName)) {
         if (fieldName === "insurancePeriodMonths") {
             if (updatedInput.insurancePeriodMonths !== "" && Number(updatedInput.insurancePeriodMonths) > 11) {
-                newErrors[fieldName].messages.push("Number of months in insurance period must be less than 12.");
+                newErrors[fieldName].fieldErrors.push({ message: "Number of months in insurance period must be less than 12.", excludedInsuranceTypes: ["whole life insurance"] });
                 newErrors[fieldName].personalFieldErrors = true;
             }
         }
-        commonError = "Insurance period must be greater than 0.";
-        clearPreviousCommonError(fieldsToValidate, newErrors, commonError);
+        commonErrorMessage = "Insurance period must be greater than 0.";
+        previousCommonErrorField = findPreviousCommonError(fieldsToValidate, newErrors, commonErrorMessage);
         personalFieldInputCorrect = fieldsToValidate.every((f) => newErrors[f].personalFieldErrors === false && updatedInput[f] !== "");
         if (personalFieldInputCorrect) {
             if (Number(updatedInput.insurancePeriodYears) === 0 && Number(updatedInput.insurancePeriodMonths) === 0) {
-                newErrors[fieldName].messages.push(commonError);
+                if (previousCommonErrorField === null) {
+                    newErrors[fieldName].fieldErrors.push({ message: commonErrorMessage, excludedInsuranceTypes: ["whole life insurance"] });
+                }
+            } else {
+                removeError(previousCommonErrorField, newErrors, commonErrorMessage);
             }
+        } else {
+            removeError(previousCommonErrorField, newErrors, commonErrorMessage);
         }
     }
     fieldsToValidate = ["birthDate", "insuranceStartDate", "insurancePeriodYears", "insurancePeriodMonths"];
     if (fieldsToValidate.includes(fieldName)) {
-        commonError = "Age of insured person at the end of insurance period can't be greater than 101.";
-        clearPreviousCommonError(fieldsToValidate, newErrors, commonError);
-        if (updatedInput.insuranceType !== "cumulative insurance") {
-            personalFieldInputCorrect = fieldsToValidate.every((f) => newErrors[f].personalFieldErrors === false && updatedInput[f] !== "");
-            if (personalFieldInputCorrect) {
-                const dateDifference = moment.duration(moment(Date.parse(updatedInput.insuranceStartDate)).diff(moment(Date.parse(updatedInput.birthDate))));
-                const endAge = 12 * (dateDifference.years() + Number(updatedInput.insurancePeriodYears)) + dateDifference.months() + Number(updatedInput.insurancePeriodMonths)
-                if (endAge > 1212 || (endAge === 1212 && dateDifference.days() !== 0)) {
-                    newErrors[fieldName].messages.push(commonError);
+        commonErrorMessage = "Age of insured person at the end of insurance period can't be greater than 101.";
+        previousCommonErrorField = findPreviousCommonError(fieldsToValidate, newErrors, commonErrorMessage);
+        personalFieldInputCorrect = fieldsToValidate.every((f) => newErrors[f].personalFieldErrors === false && updatedInput[f] !== "");
+        if (personalFieldInputCorrect) {
+            const dateDifference = moment.duration(moment(Date.parse(updatedInput.insuranceStartDate)).diff(moment(Date.parse(updatedInput.birthDate))));
+            const endAge = 12 * (dateDifference.years() + Number(updatedInput.insurancePeriodYears)) + dateDifference.months() + Number(updatedInput.insurancePeriodMonths)
+            if (endAge > 1212 || (endAge === 1212 && dateDifference.days() !== 0)) {
+                if (previousCommonErrorField === null) {
+                    newErrors[fieldName].fieldErrors.push({ message: commonErrorMessage, excludedInsuranceTypes: ["cumulative insurance", "whole life insurance"] });
                 }
+            } else {
+                removeError(previousCommonErrorField, newErrors, commonErrorMessage);
             }
+        } else {
+            removeError(previousCommonErrorField, newErrors, commonErrorMessage);
         }
     }
     return newErrors;
 }
 
-function clearPreviousCommonError(fieldsToValidate, errors, commonError) {
+function findPreviousCommonError(fieldsToValidate, errors, commonError) {
     for (let f of fieldsToValidate) {
-        if (errors[f].messages.includes(commonError)) {
-            errors[f].messages = errors[f].messages.filter((m) => (m !== commonError));
-            break;
+        if (errors[f].fieldErrors.some((e) => e.message === commonError)) {
+            return f;
         }
     }
+    return null;
 }
+
+function removeError(field, errors, commonError) {
+    if (field === null) {
+        return;
+    }
+    errors[field].fieldErrors = errors[field].fieldErrors.filter((e) => (e.message !== commonError));
+}
+
+// function clearPreviousCommonError(fieldsToValidate, errors, commonError) {
+//     for (let f of fieldsToValidate) {
+//         if (errors[f].fieldErrors.some((e) => e.message === commonError)) {
+//             errors[f].fieldErrors = errors[f].fieldErrors.filter((e) => (e.message !== commonError));
+//             break;
+//         }
+//     }
+// }
 
 // function commonHandleInput(e, validate, setInput) {
 //     if (!e.target.validity.valid) {
@@ -128,4 +161,4 @@ const commonHandleInput = (e, input, validate, setInput, setErrors) => {
     setErrors(newErrors);
 }
 
-export { clearPreviousCommonError, getBaseErrors, getCommonErrors, getCommonExcludedFields, commonHandleInput };
+export { findPreviousCommonError, removeError, getBaseErrors, getCommonErrors, getCommonExcludedFields, commonHandleInput };

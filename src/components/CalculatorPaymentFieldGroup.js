@@ -1,18 +1,19 @@
 import React from "react";
-import CalculatorField from "./CalculatorField.js"
-import {inputFloatPattern} from "../constants.js"
+import CalculatorField from "./CalculatorField.js";
+import {inputFloatPattern} from "../constants.js";
+import CalculatorFieldErrorGroup from "./CalculatorFieldErrorGroup.js";
 
 
-function CalculatorPaymentFieldGroup({ insuranceLoading, insurancePremiumRate, insuranceLoadingErrors, insurancePremiumRateErrors, handleInput }) {
+function CalculatorPaymentFieldGroup({ insuranceLoading, insurancePremiumRate, insuranceLoadingErrors, insurancePremiumRateErrors, insuranceType, handleInput }) {
     return (
         <React.Fragment>
             <CalculatorField labelText="Enter return rate of insurance premium:">
                 <input type="text" inputMode="numeric" pattern={inputFloatPattern} name="insurancePremiumRate" value={insurancePremiumRate} onChange={handleInput} />
-                {insurancePremiumRateErrors && <div className="error">{insurancePremiumRateErrors.messages.map((m)=><p key={m}>{m}</p>)}</div>}
+                <CalculatorFieldErrorGroup errors={insurancePremiumRateErrors} insuranceType={insuranceType}/>                
             </CalculatorField>
             <CalculatorField labelText="Enter loading:">
                 <input type="text" inputMode="numeric" pattern={inputFloatPattern} name="insuranceLoading" value={insuranceLoading} onChange={handleInput} />
-                {insuranceLoadingErrors && <div className="error">{insuranceLoadingErrors.messages.map((m)=><p key={m}>{m}</p>)}</div>}
+                <CalculatorFieldErrorGroup errors={insuranceLoadingErrors} insuranceType={insuranceType}/>                
             </CalculatorField>
         </React.Fragment>
     )

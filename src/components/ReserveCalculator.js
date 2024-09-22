@@ -3,8 +3,9 @@ import CalculatorTraitFieldGroup from "./CalculatorTraitFieldGroup.js";
 import CalculatorTimeFieldGroup from "./CalculatorTimeFieldGroup.js";
 import CalculatorPaymentFieldGroup from "./CalculatorPaymentFieldGroup.js";
 import PeriodFieldGroup from "./PeriodFieldGroup.js";
+import CalculatorFieldErrorGroup from "./CalculatorFieldErrorGroup.js";
 import { inputFloatPattern, API_URL } from "../constants.js";
-import { getBaseErrors, getCommonErrors, getCommonExcludedFields, clearPreviousCommonError, commonHandleInput } from "../utils.js";
+import { getBaseErrors, getCommonErrors, getCommonExcludedFields, removeError, findPreviousCommonError, commonHandleInput } from "../utils.js";
 import { useToggleButton } from "../hooks.js";
 import axios from "axios";
 
@@ -28,38 +29,39 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
         insurancePremium: ''
     }
     const errors = savedErrors || Object.keys(input).reduce((acc, field) => {
-        acc[field] = { messages: [], personalFieldErrors: false };
+        acc[field] = { fieldErrors: [], personalFieldErrors: false };
         return acc;
     }, {})
-    const result = savedResult; 
+    const result = savedResult;
 
     const getExcludedFields = React.useCallback(() => {
-        let excludedFields = getCommonExcludedFields(input);    
+        let excludedFields = getCommonExcludedFields(input);
         if (input.inputVariable === "insurancePremium") {
             excludedFields.push("insuranceSum");
         } else if (input.inputVariable === "insuranceSum") {
             excludedFields.push("insurancePremium");
-        }     
+        }
         return excludedFields
     }, [input])
     const isButtonActive = useToggleButton(input, errors, getExcludedFields);
 
     const validate = (fieldName, updatedInput) => {
-        let newErrors = { ...errors, [fieldName]: { messages: [], personalFieldErrors: false } };
+        let newErrors = { ...errors, [fieldName]: { fieldErrors: [], personalFieldErrors: false } };
         let fieldsToValidate;
-        let commonError;
+        let commonErrorMessage;
         let personalFieldInputCorrect;
+        let previousCommonErrorField;
         newErrors = getBaseErrors(fieldName, updatedInput, newErrors);
-        newErrors = getCommonErrors(fieldName, updatedInput, newErrors);   
+        newErrors = getCommonErrors(fieldName, updatedInput, newErrors);
 
         if (fieldName === "insurancePremium") {
             if (updatedInput.insurancePremium !== "" && Number(updatedInput.insurancePremium) <= 0) {
-                newErrors[fieldName].messages.push("Insurance premium must be greater than 0.");
+                newErrors[fieldName].fieldErrors.push({ message: "Insurance premium must be greater than 0.", excludedInsuranceTypes: [] });
                 newErrors[fieldName].personalFieldErrors = true;
             }
         } else if (fieldName === "insuranceSum") {
             if (updatedInput.insuranceSum !== "" && Number(updatedInput.insuranceSum) <= 0) {
-                newErrors[fieldName].messages.push("Insurance sum must be greater than 0.");
+                newErrors[fieldName].fieldErrors.push({ message: "Insurance sum must be greater than 0.", excludedInsuranceTypes: [] });
                 newErrors[fieldName].personalFieldErrors = true;
             }
         }
@@ -68,29 +70,41 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
         if (fieldsToValidate.includes(fieldName)) {
             if (fieldName === "reservePeriodMonths") {
                 if (updatedInput.reservePeriodMonths !== "" && updatedInput.reservePeriodMonths > 11) {
-                    newErrors[fieldName].messages.push("Number of months in period from insurance start to reserve calculation must be less than 12.");
+                    newErrors[fieldName].fieldErrors.push({ message: "Number of months in period from insurance start to reserve calculation must be less than 12.", excludedInsuranceTypes: [] });
                     newErrors[fieldName].personalFieldErrors = true;
                 }
-            }    
-            commonError = "Period from insurance start to reserve calculation must be greater than 0.";
-            clearPreviousCommonError(fieldsToValidate, newErrors, commonError);
+            }
+            commonErrorMessage = "Period from insurance start to reserve calculation must be greater than 0.";
+            previousCommonErrorField = findPreviousCommonError(fieldsToValidate, newErrors, commonErrorMessage);
             personalFieldInputCorrect = fieldsToValidate.every((f) => newErrors[f].personalFieldErrors === false && updatedInput[f] !== "");
             if (personalFieldInputCorrect) {
                 if (Number(updatedInput.reservePeriodYears) === 0 && Number(updatedInput.reservePeriodMonths) === 0) {
-                    newErrors[fieldName].messages.push(commonError);
+                    if (previousCommonErrorField === null) {
+                        newErrors[fieldName].fieldErrors.push({ message: commonErrorMessage, excludedInsuranceTypes: [] });
+                    }
+                } else {
+                    removeError(previousCommonErrorField, newErrors, commonErrorMessage);
                 }
+            } else {
+                removeError(previousCommonErrorField, newErrors, commonErrorMessage);
             }
         }
 
         fieldsToValidate = fieldsToValidate = ["insurancePeriodYears", "insurancePeriodMonths", "reservePeriodYears", "reservePeriodMonths"];
-        if (fieldsToValidate.includes(fieldName)) {        
-            commonError = "Period from insurance start to reserve calculation must be less than insurance period.";
-            clearPreviousCommonError(fieldsToValidate, newErrors, commonError);
+        if (fieldsToValidate.includes(fieldName)) {
+            commonErrorMessage = "Period from insurance start to reserve calculation must be less than insurance period.";
+            previousCommonErrorField = findPreviousCommonError(fieldsToValidate, newErrors, commonErrorMessage);
             personalFieldInputCorrect = fieldsToValidate.every((f) => newErrors[f].personalFieldErrors === false && updatedInput[f] !== "");
             if (personalFieldInputCorrect) {
                 if ((12 * Number(updatedInput.reservePeriodYears) + Number(updatedInput.reservePeriodMonths)) >= (12 * Number(updatedInput.insurancePeriodYears) + Number(updatedInput.insurancePeriodMonths))) {
-                    newErrors[fieldName].messages.push(commonError);
+                    if (previousCommonErrorField === null) {
+                        newErrors[fieldName].fieldErrors.push({ message: commonErrorMessage, excludedInsuranceTypes: ["whole life insurance"] });
+                    }
+                } else {
+                    removeError(previousCommonErrorField, newErrors, commonErrorMessage);
                 }
+            } else {
+                removeError(previousCommonErrorField, newErrors, commonErrorMessage);
             }
         }
         return newErrors;
@@ -116,12 +130,12 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
     //     let buttonState = false;
     //     let excludedFields = getCommonExcludedFields(input);        
 
-        // if (input.inputVariable === "insurancePremium") {
-        //     excludedFields.push("insuranceSum");
-        // } else if (input.inputVariable === "insuranceSum") {
-        //     excludedFields.push("insurancePremium");
-        // }      
-        
+    // if (input.inputVariable === "insurancePremium") {
+    //     excludedFields.push("insuranceSum");
+    // } else if (input.inputVariable === "insuranceSum") {
+    //     excludedFields.push("insurancePremium");
+    // }      
+
     //     const trackedFields = allFields.filter((v) => !excludedFields.includes(v));   
     //     if (trackedFields.every((v) => input[v] !== "") && trackedFields.every((v) => errors[v].messages.length === 0)) {       
     //         buttonState = true;
@@ -192,6 +206,7 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
                     insuranceLoading={input.insuranceLoading}
                     insurancePremiumRateErrors={errors.insurancePremiumRate}
                     insuranceLoadingErrors={errors.insuranceLoading}
+                    insuranceType={input.insuranceType}
                     handleInput={handleInput}
                 />
                 <div className="field-block">
@@ -212,7 +227,7 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
                         onChange={handleInput}
                         disabled={input.inputVariable !== "insurancePremium"}
                     />
-                    {errors.insurancePremium && <div className="error">{errors.insurancePremium.messages.map((m)=><p key={m}>{m}</p>)}</div>}
+                    <CalculatorFieldErrorGroup errors={errors.insurancePremium} insuranceType={input.insuranceType} />                  
                 </div>
                 <div className="field-block">
                     <input
@@ -232,7 +247,7 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
                         onChange={handleInput}
                         disabled={input.inputVariable !== "insuranceSum"}
                     />
-                    {errors.insuranceSum && <div className="error">{errors.insuranceSum.messages.map((m)=><p key={m}>{m}</p>)}</div>}
+                    <CalculatorFieldErrorGroup errors={errors.insuranceSum} insuranceType={input.insuranceType} />
                 </div>
                 <PeriodFieldGroup
                     labelText="Enter time from insurance start to reserve calculation:"
@@ -242,10 +257,11 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
                     monthsField={input.reservePeriodMonths}
                     yearsFieldErrors={errors.reservePeriodYears}
                     monthsFieldErrors={errors.reservePeriodMonths}
+                    insuranceType={input.insuranceType}
                     handleInput={handleInput}
                 />
                 <button type="submit" disabled={!isButtonActive} className={!isButtonActive ? "disabled" : null}>Calculate</button>
-                {(input.result) && (
+                {result !== null && (
                     <div className="result-display">
                         Reserve={result}
                     </div>

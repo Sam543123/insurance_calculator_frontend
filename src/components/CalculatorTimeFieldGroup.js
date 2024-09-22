@@ -1,6 +1,7 @@
 import React from "react";
-import CalculatorField from "./CalculatorField.js"
+import CalculatorField from "./CalculatorField.js";
 import PeriodFieldGroup from "./PeriodFieldGroup.js";
+import CalculatorFieldErrorGroup from "./CalculatorFieldErrorGroup.js";
 
 function CalculatorTimeFieldGroup(props) {
     return (
@@ -9,11 +10,11 @@ function CalculatorTimeFieldGroup(props) {
                 <React.Fragment>
                     <CalculatorField labelText="Enter birth date of the insured:">
                         <input type="date" name="birthDate" value={props.birthDate} onChange={props.handleInput} />
-                        {props.birthDateErrors && <div className="error">{props.birthDateErrors.messages.map((m)=><p key={m}>{m}</p>)}</div>}
+                        <CalculatorFieldErrorGroup errors={props.birthDateErrors} insuranceType={props.insuranceType}/> 
                     </CalculatorField>
                     <CalculatorField labelText="Enter start date of insurance:">
                         <input type="date" name="insuranceStartDate" value={props.insuranceStartDate} onChange={props.handleInput} />
-                        {props.insuranceStartDateErrors && <div className="error">{props.insuranceStartDateErrors.messages.map((m)=><p key={m}>{m}</p>)}</div>}
+                        <CalculatorFieldErrorGroup errors={props.insuranceStartDateErrors} insuranceType={props.insuranceType}/>                        
                     </CalculatorField>
                 </React.Fragment>
             )}
@@ -26,6 +27,7 @@ function CalculatorTimeFieldGroup(props) {
                     monthsField={props.insurancePeriodMonths}
                     yearsFieldErrors={props.insurancePeriodYearsErrors}
                     monthsFieldErrors={props.insurancePeriodMonthsErrors}
+                    insuranceType={props.insuranceType}
                     handleInput={props.handleInput}
                 />
             )}

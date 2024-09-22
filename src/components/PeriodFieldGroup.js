@@ -1,6 +1,7 @@
 import React from "react";
-import CalculatorField from "./CalculatorField.js"
-import { inputIntegerPattern } from "../constants.js"
+import CalculatorField from "./CalculatorField.js";
+import { inputIntegerPattern } from "../constants.js";
+import CalculatorFieldErrorGroup from "./CalculatorFieldErrorGroup.js";
 
 function PeriodFieldGroup(props) {
     return (
@@ -11,14 +12,14 @@ function PeriodFieldGroup(props) {
                         years
                     </label>
                     <input type="text" inputMode="numeric" pattern={inputIntegerPattern} name={props.yearsFieldName} value={props.yearsField} onChange={props.handleInput} />
-                    {props.yearsFieldErrors && <div className="error">{props.yearsFieldErrors.messages.map((m) => <p key={m}>{m}</p>)}</div>}
+                    <CalculatorFieldErrorGroup errors={props.yearsFieldErrors}  insuranceType={props.insuranceType} />                  
                 </div>
                 <div>
                     <label>
                         months
                     </label>
                     <input type="text" inputMode="numeric" pattern={inputIntegerPattern} name={props.monthsFieldName} value={props.monthsField} onChange={props.handleInput} />
-                    {props.monthsFieldErrors && <div className="error">{props.monthsFieldErrors.messages.map((m) => <p key={m}>{m}</p>)}</div>}
+                    <CalculatorFieldErrorGroup errors={props.monthsFieldErrors}  insuranceType={props.insuranceType} />                 
                 </div>
 
             </div>

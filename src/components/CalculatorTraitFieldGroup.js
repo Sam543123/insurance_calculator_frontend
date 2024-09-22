@@ -1,5 +1,5 @@
 import React from "react";
-import CalculatorField from "./CalculatorField.js"
+import CalculatorField from "./CalculatorField.js";
 
 
 function CalculatorTraitFieldGroup({ insuranceType, insurancePremiumFrequency, gender, handleInput }) {

@@ -1,11 +1,12 @@
 import React from "react";
-import CalculatorField from "./CalculatorField.js"
-import CalculatorTraitFieldGroup from "./CalculatorTraitFieldGroup.js"
-import CalculatorTimeFieldGroup from "./CalculatorTimeFieldGroup.js"
-import CalculatorPaymentFieldGroup from "./CalculatorPaymentFieldGroup.js"
-import { getBaseErrors, getCommonErrors, getCommonExcludedFields, commonHandleInput } from "../utils.js"
-import { useToggleButton } from "../hooks.js"
-import { inputFloatPattern, API_URL } from "../constants.js"
+import CalculatorField from "./CalculatorField.js";
+import CalculatorTraitFieldGroup from "./CalculatorTraitFieldGroup.js";
+import CalculatorTimeFieldGroup from "./CalculatorTimeFieldGroup.js";
+import CalculatorPaymentFieldGroup from "./CalculatorPaymentFieldGroup.js";
+import CalculatorFieldErrorGroup from "./CalculatorFieldErrorGroup.js";
+import { getBaseErrors, getCommonErrors, getCommonExcludedFields, commonHandleInput } from "../utils.js";
+import { useToggleButton } from "../hooks.js";
+import { inputFloatPattern, API_URL } from "../constants.js";
 import axios from "axios";
 
 
@@ -24,21 +25,21 @@ function SumCalculator({ savedInput, savedErrors, savedResult, setInput, setErro
         insurancePremium: ''
     }
     const errors = savedErrors || Object.keys(input).reduce((acc, field) => {
-        acc[field] = { messages: [], personalFieldErrors: false };
+        acc[field] = { fieldErrors: [], personalFieldErrors: false };
         return acc;
     }, {})
     const result = savedResult;
     const isButtonActive = useToggleButton(input, errors, getCommonExcludedFields);
-      
+
 
     const validate = (fieldName, updatedInput) => {
-        let newErrors = { ...errors, [fieldName]: { messages: [], personalFieldErrors: false } };
+        let newErrors = { ...errors, [fieldName]: { fieldErrors: [], personalFieldErrors: false } };
         newErrors = getBaseErrors(fieldName, updatedInput, newErrors);
         newErrors = getCommonErrors(fieldName, updatedInput, newErrors);
 
         if (fieldName === "insurancePremium") {
             if (updatedInput.insurancePremium !== "" && Number(updatedInput.insurancePremium) <= 0) {
-                newErrors[fieldName].messages.push("Insurance premium must be greater than 0.");
+                newErrors[fieldName].fieldErrors.push({message: "Insurance premium must be greater than 0.", excludedInsuranceTypes: []});
                 newErrors[fieldName].personalFieldErrors = true;
             }
         }
@@ -60,12 +61,12 @@ function SumCalculator({ savedInput, savedErrors, savedResult, setInput, setErro
     const handleInput = (e) => {
         commonHandleInput(e, input, validate, setInput, setErrors);
     };
-   
+
     // React.useLayoutEffect(() => {
     //     const allFields = Object.keys(input);
     //     let buttonState = false;
     //     let excludedFields = getCommonExcludedFields(input);        
-        
+
     //     const trackedFields = allFields.filter((v) => !excludedFields.includes(v));   
     //     if (trackedFields.every((v) => input[v] !== "") && trackedFields.every((v) => errors[v].messages.length === 0)) {       
     //         buttonState = true;
@@ -130,14 +131,15 @@ function SumCalculator({ savedInput, savedErrors, savedResult, setInput, setErro
                     insuranceLoading={input.insuranceLoading}
                     insurancePremiumRateErrors={errors.insurancePremiumRate}
                     insuranceLoadingErrors={errors.insuranceLoading}
+                    insuranceType={input.insuranceType}
                     handleInput={handleInput}
                 />
                 <CalculatorField labelText="Enter insurance premium:">
                     <input type="text" inputMode="numeric" pattern={inputFloatPattern} name="insurancePremium" value={input.insurancePremium} onChange={handleInput} />
-                    {errors.insurancePremium && <div className="error">{errors.insurancePremium.messages.map((m)=><p key={m}>{m}</p>)}</div>}
+                    <CalculatorFieldErrorGroup errors={errors.insurancePremium} insuranceType={input.insuranceType} />                   
                 </CalculatorField>
                 <button type="submit" disabled={!isButtonActive} className={!isButtonActive ? "disabled" : null}>Calculate</button>
-                {(input.result) && (
+                {result !== null && (
                     <div className="result-display">
                         Insurance sum={result}
                     </div>
