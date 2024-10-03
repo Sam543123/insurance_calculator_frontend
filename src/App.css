@@ -1,13 +1,11 @@
 .App {
   font-family: Arial, sans-serif;
-  max-width: 600px;
-  /* max-height: 500px; */
+  max-width: 600px;  
   margin: 45px auto;
   padding: 20px;
   background-color: #f9f9f9;
   border: 1px solid #ccc;
   border-radius: 10px;
-  /* overflow-y: auto; */
 }
 
 h1 {
@@ -39,7 +37,7 @@ form input[type="radio"] {width: auto;}
 .inputs-group {
   display: flex;
   flex-direction: row;
-  justify-content: space-evenly;
+  justify-content: space-evenly; 
 }
 
 .inputs-group * { 
