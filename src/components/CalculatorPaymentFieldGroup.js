@@ -1,6 +1,6 @@
 import React from "react";
 import CalculatorField from "./CalculatorField.js";
-import {inputFloatPattern} from "../constants.js";
+import { inputFloatPattern } from "../utils.js";
 import CalculatorFieldErrorGroup from "./CalculatorFieldErrorGroup.js";
 
 

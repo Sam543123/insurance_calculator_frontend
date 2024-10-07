@@ -4,7 +4,7 @@ import CalculatorTraitFieldGroup from "./CalculatorTraitFieldGroup.js";
 import CalculatorPaymentFieldGroup from "./CalculatorPaymentFieldGroup.js";
 import PeriodFieldGroup from "./PeriodFieldGroup.js";
 import CalculatorFieldErrorGroup from "./CalculatorFieldErrorGroup.js";
-import { inputIntegerPattern, API_URL } from "../constants.js";
+import { inputIntegerPattern, REACT_APP_API_URL  } from "../utils.js";
 import { getBaseErrors, removeError, findPreviousCommonError, commonHandleInput } from "../utils.js";
 import { useToggleButton } from "../hooks.js";
 import axios from "axios";
@@ -135,7 +135,7 @@ function TariffsCalculator({ savedInput, savedErrors, setInput, setErrors }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const routeURL = `${API_URL}tariffs/`;
+        const routeURL = `${REACT_APP_API_URL }tariffs/`;
         let requestData = {
             insuranceType: input.insuranceType,
             insurancePremiumFrequency: input.insurancePremiumFrequency,

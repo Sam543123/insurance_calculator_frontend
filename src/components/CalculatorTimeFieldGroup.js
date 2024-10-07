@@ -8,7 +8,7 @@ function CalculatorTimeFieldGroup(props) {
         <React.Fragment>
             {props.insuranceType !== "cumulative insurance" && (
                 <React.Fragment>
-                    <CalculatorField labelText="Enter birth date of the insured:">
+                    <CalculatorField labelText="Enter birth date of insured person:">
                         <input type="date" name="birthDate" value={props.birthDate} onChange={props.handleInput} />
                         <CalculatorFieldErrorGroup errors={props.birthDateErrors} insuranceType={props.insuranceType}/> 
                     </CalculatorField>
@@ -20,7 +20,7 @@ function CalculatorTimeFieldGroup(props) {
             )}
             {props.insuranceType !== "whole life insurance" && (
                 <PeriodFieldGroup
-                    labelText="Enter the insurance period:"
+                    labelText="Enter insurance period:"
                     yearsFieldName="insurancePeriodYears"
                     monthsFieldName="insurancePeriodMonths"
                     yearsField={props.insurancePeriodYears}

@@ -1,5 +1,9 @@
 import moment from 'moment';
 
+const REACT_APP_API_URL  = process.env.REACT_APP_API_URL || "http://localhost:8000/calculate/";
+const inputIntegerPattern = "[0-9]*";
+const inputFloatPattern = "([0-9]+\\.?[0-9]*)?";
+
 function getBaseErrors(fieldName, updatedInput, errors) {
     let newErrors = { ...errors };
     if (fieldName === "insuranceLoading") {
@@ -66,7 +70,7 @@ function getCommonErrors(fieldName, updatedInput, errors) {
     }
     fieldsToValidate = ["birthDate", "insuranceStartDate", "insurancePeriodYears", "insurancePeriodMonths"];
     if (fieldsToValidate.includes(fieldName)) {
-        commonErrorMessage = "Age of insured person at the end of insurance period can't be greater than 101.";
+        commonErrorMessage = "Age of insured person at end of insurance period can't be greater than 101.";
         previousCommonErrorField = findPreviousCommonError(fieldsToValidate, newErrors, commonErrorMessage);
         personalFieldInputCorrect = fieldsToValidate.every((f) => newErrors[f].personalFieldErrors === false && updatedInput[f] !== "");
         if (personalFieldInputCorrect) {
@@ -124,4 +128,4 @@ const commonHandleInput = (e, input, validate, setInput, setErrors) => {
     setErrors(newErrors);
 }
 
-export { findPreviousCommonError, removeError, getBaseErrors, getCommonErrors, getCommonExcludedFields, commonHandleInput };
+export { findPreviousCommonError, removeError, getBaseErrors, getCommonErrors, getCommonExcludedFields, commonHandleInput, REACT_APP_API_URL, inputIntegerPattern, inputFloatPattern };

@@ -6,7 +6,7 @@ import CalculatorPaymentFieldGroup from "./CalculatorPaymentFieldGroup.js";
 import CalculatorFieldErrorGroup from "./CalculatorFieldErrorGroup.js";
 import { getBaseErrors, getCommonErrors, getCommonExcludedFields, commonHandleInput } from "../utils.js";
 import { useToggleButton } from "../hooks.js";
-import { inputFloatPattern, API_URL } from "../constants.js";
+import { inputFloatPattern, REACT_APP_API_URL  } from "../utils.js";
 import axios from "axios";
 
 function PremiumCalculator({ savedInput, savedErrors, savedResult, setInput, setErrors, setResult }) {
@@ -53,7 +53,7 @@ function PremiumCalculator({ savedInput, savedErrors, savedResult, setInput, set
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const routeURL = `${API_URL}insurance_premium/`;
+        const routeURL = `${REACT_APP_API_URL }insurance_premium/`;
         let requestData = {
             insuranceType: input.insuranceType,
             insurancePremiumFrequency: input.insurancePremiumFrequency,

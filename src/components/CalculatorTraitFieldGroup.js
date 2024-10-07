@@ -20,7 +20,7 @@ function CalculatorTraitFieldGroup({ insuranceType, insurancePremiumFrequency, g
                     <option>monthly</option>
                 </select>
             </CalculatorField>
-            <CalculatorField labelText="Choose gender of the insured person:">
+            <CalculatorField labelText="Choose gender of insured person:">
                 <select name="gender" value={gender} onChange={handleInput}>
                     <option>male</option>
                     <option>female</option>

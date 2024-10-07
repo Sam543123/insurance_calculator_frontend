@@ -4,14 +4,13 @@ import CalculatorTimeFieldGroup from "./CalculatorTimeFieldGroup.js";
 import CalculatorPaymentFieldGroup from "./CalculatorPaymentFieldGroup.js";
 import PeriodFieldGroup from "./PeriodFieldGroup.js";
 import CalculatorFieldErrorGroup from "./CalculatorFieldErrorGroup.js";
-import { inputFloatPattern, API_URL } from "../constants.js";
+import { inputFloatPattern, REACT_APP_API_URL  } from "../utils.js";
 import { getBaseErrors, getCommonErrors, getCommonExcludedFields, removeError, findPreviousCommonError, commonHandleInput } from "../utils.js";
 import { useToggleButton } from "../hooks.js";
 import axios from "axios";
 
 
 function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, setErrors, setResult }) {
-    // const [isButtonActive, setIsButtonActive] = React.useState(false);
     const input = savedInput || {
         insuranceType: 'pure endowment',
         insurancePremiumFrequency: 'simultaneously',
@@ -109,44 +108,14 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
         }
         return newErrors;
     }
-
-    // const handleInput = (e) => {       
-    //     if (!e.target.validity.valid) {
-    //         return;
-    //     }
-    //     const { name, value } = e.target;
-    //     const updatedInput = { ...input, [name]: value }
-    //     const newErrors = validate(name, updatedInput)
-    //     setInput(updatedInput);
-    //     setErrors(newErrors);       
-    // }
-
+   
     const handleInput = (e) => {
         commonHandleInput(e, input, validate, setInput, setErrors);
     };
 
-    // React.useLayoutEffect(() => {
-    //     const allFields = Object.keys(input);
-    //     let buttonState = false;
-    //     let excludedFields = getCommonExcludedFields(input);        
-
-    // if (input.inputVariable === "insurancePremium") {
-    //     excludedFields.push("insuranceSum");
-    // } else if (input.inputVariable === "insuranceSum") {
-    //     excludedFields.push("insurancePremium");
-    // }      
-
-    //     const trackedFields = allFields.filter((v) => !excludedFields.includes(v));   
-    //     if (trackedFields.every((v) => input[v] !== "") && trackedFields.every((v) => errors[v].messages.length === 0)) {       
-    //         buttonState = true;
-    //     }
-    //     setIsButtonActive(buttonState);
-    // }, [input, errors])
-
-
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const routeURL = `${API_URL}reserve/`;
+        const routeURL = `${REACT_APP_API_URL }reserve/`;
         let requestData = {
             insuranceType: input.insuranceType,
             insurancePremiumFrequency: input.insurancePremiumFrequency,
