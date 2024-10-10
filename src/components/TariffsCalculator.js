@@ -140,8 +140,8 @@ function TariffsCalculator({ savedInput, savedErrors, setInput, setErrors }) {
             insuranceType: input.insuranceType,
             insurancePremiumFrequency: input.insurancePremiumFrequency,
             gender: input.gender,
-            insurancePremiumRate: input.insurancePremiumRate,
-            insuranceLoading: input.insuranceLoading
+            insurancePremiumRate: input.insurancePremiumRate / 100,
+            insuranceLoading: input.insuranceLoading / 100,
         };
 
         if (input.insuranceType !== "cumulative insurance") {

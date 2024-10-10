@@ -7,8 +7,8 @@ const inputFloatPattern = "([0-9]+\\.?[0-9]*)?";
 function getBaseErrors(fieldName, updatedInput, errors) {
     let newErrors = { ...errors };
     if (fieldName === "insuranceLoading") {
-        if (updatedInput.insuranceLoading !== "" && Number(updatedInput.insuranceLoading) >= 1) {
-            newErrors[fieldName].fieldErrors.push({ message: "Insurance loading must be less than 1.", excludedInsuranceTypes: [] });
+        if (updatedInput.insuranceLoading !== "" && Number(updatedInput.insuranceLoading) >= 100) {
+            newErrors[fieldName].fieldErrors.push({ message: "Insurance loading must be less than 100%.", excludedInsuranceTypes: [] });
             newErrors[fieldName].personalFieldErrors = true;
         }
     }
