@@ -165,7 +165,7 @@ function TariffsCalculator({ savedInput, savedErrors, setInput, setErrors }) {
     }
 
     return (
-        <div className="App">
+        <div className="calculator-form">
             <form onSubmit={handleSubmit} noValidate>
                 <CalculatorTraitFieldGroup
                     insuranceType={input.insuranceType}

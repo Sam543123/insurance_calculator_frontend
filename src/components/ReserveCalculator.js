@@ -4,7 +4,7 @@ import CalculatorTimeFieldGroup from "./CalculatorTimeFieldGroup.js";
 import CalculatorPaymentFieldGroup from "./CalculatorPaymentFieldGroup.js";
 import PeriodFieldGroup from "./PeriodFieldGroup.js";
 import CalculatorFieldErrorGroup from "./CalculatorFieldErrorGroup.js";
-import { inputFloatPattern, REACT_APP_API_URL  } from "../utils.js";
+import { inputFloatPattern, REACT_APP_API_URL } from "../utils.js";
 import { getBaseErrors, getCommonErrors, getCommonExcludedFields, removeError, findPreviousCommonError, commonHandleInput } from "../utils.js";
 import { useToggleButton } from "../hooks.js";
 import axios from "axios";
@@ -108,14 +108,14 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
         }
         return newErrors;
     }
-   
+
     const handleInput = (e) => {
         commonHandleInput(e, input, validate, setInput, setErrors);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const routeURL = `${REACT_APP_API_URL }reserve/`;
+        const routeURL = `${REACT_APP_API_URL}reserve/`;
         let requestData = {
             insuranceType: input.insuranceType,
             insurancePremiumFrequency: input.insurancePremiumFrequency,
@@ -150,7 +150,7 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
     }
 
     return (
-        <div className="App">
+        <div className="calculator-form">
             <form onSubmit={handleSubmit} noValidate>
                 <CalculatorTraitFieldGroup
                     insuranceType={input.insuranceType}
@@ -179,14 +179,16 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
                     handleInput={handleInput}
                 />
                 <div className="field-block">
-                    <input
-                        type="radio"
-                        name="inputVariable"
-                        value="insurancePremium"
-                        checked={input.inputVariable === "insurancePremium"}
-                        onChange={handleInput}
-                    />
-                    <label>Enter insurance premium:</label>
+                    <div>
+                        <input
+                            type="radio"
+                            name="inputVariable"
+                            value="insurancePremium"
+                            checked={input.inputVariable === "insurancePremium"}
+                            onChange={handleInput}
+                        />
+                        <label>Enter insurance premium:</label>
+                    </div>
                     <input
                         type="text"
                         inputMode="numeric"
@@ -196,17 +198,19 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
                         onChange={handleInput}
                         disabled={input.inputVariable !== "insurancePremium"}
                     />
-                    <CalculatorFieldErrorGroup errors={errors.insurancePremium} insuranceType={input.insuranceType} />                  
+                    <CalculatorFieldErrorGroup errors={errors.insurancePremium} insuranceType={input.insuranceType} />
                 </div>
                 <div className="field-block">
-                    <input
-                        type="radio"
-                        name="inputVariable"
-                        value="insuranceSum"
-                        checked={input.inputVariable === "insuranceSum"}
-                        onChange={handleInput}
-                    />
-                    <label>Enter insurance sum:</label>
+                    <div>
+                        <input
+                            type="radio"
+                            name="inputVariable"
+                            value="insuranceSum"
+                            checked={input.inputVariable === "insuranceSum"}
+                            onChange={handleInput}
+                        />
+                        <label>Enter insurance sum:</label>
+                    </div>
                     <input
                         type="text"
                         inputMode="numeric"

@@ -81,7 +81,7 @@ function PremiumCalculator({ savedInput, savedErrors, savedResult, setInput, set
     }
 
     return (
-        <div className="App">
+        <div className="calculator-form">
             <form onSubmit={handleSubmit} noValidate>
                 <CalculatorTraitFieldGroup
                     insuranceType={input.insuranceType}

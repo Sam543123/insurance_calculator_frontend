@@ -1,4 +1,4 @@
-.App {
+.calculator-form {
   font-family: Arial, sans-serif;
   max-width: 600px;  
   margin: 45px auto;
@@ -20,36 +20,52 @@ form {
 }
 
 .field-block {
+  display: flex;
+  flex-direction: column;
+  width: calc(100% - 20px);
+  margin: auto; 
   margin-bottom: 15px;
 }
 
 form input,
-form select {
-  width: calc(100% - 20px);
+form select { 
   padding: 8px;
   margin-top: 5px;
   border: 1px solid #ccc;
   border-radius: 5px;
 }
 
-form input[type="radio"] {width: auto;}
-
-.inputs-group {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-evenly; 
+form p {
+  margin: 5px 0px
 }
 
-.inputs-group * { 
+.period-field-group {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;  
+}
+
+.period-field-input {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.period-field { 
+  flex: 1;
+}
+
+.period-field-group * { 
   width: auto;  
 }
 
-.inputs-group input { 
-  margin-left: 10px;
+.period-field-group div { 
+  margin: 5px 0px 0px;  
 }
 
-.inputs-group div { 
-  margin-top: 5px;
+.period-field-input input { 
+  margin-left: 15px;
 }
 
 button {

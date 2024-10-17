@@ -83,7 +83,7 @@ function SumCalculator({ savedInput, savedErrors, savedResult, setInput, setErro
 
 
     return (
-        <div className="App">
+        <div className="calculator-form">
             <form onSubmit={handleSubmit} noValidate>
                 <CalculatorTraitFieldGroup
                     insuranceType={input.insuranceType}
