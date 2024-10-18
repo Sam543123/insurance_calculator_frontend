@@ -4,9 +4,10 @@ import CalculatorTraitFieldGroup from "./CalculatorTraitFieldGroup.js";
 import CalculatorTimeFieldGroup from "./CalculatorTimeFieldGroup.js";
 import CalculatorPaymentFieldGroup from "./CalculatorPaymentFieldGroup.js";
 import CalculatorFieldErrorGroup from "./CalculatorFieldErrorGroup.js";
+import CalculatorResult from "./CalculatorResult.js";
 import { getBaseErrors, getCommonErrors, getCommonExcludedFields, commonHandleInput } from "../utils.js";
 import { useToggleButton } from "../hooks.js";
-import { inputFloatPattern, REACT_APP_API_URL  } from "../utils.js";
+import { inputFloatPattern, REACT_APP_API_URL } from "../utils.js";
 import axios from "axios";
 
 function PremiumCalculator({ savedInput, savedErrors, savedResult, setInput, setErrors, setResult }) {
@@ -53,7 +54,7 @@ function PremiumCalculator({ savedInput, savedErrors, savedResult, setInput, set
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const routeURL = `${REACT_APP_API_URL }insurance_premium/`;
+        const routeURL = `${REACT_APP_API_URL}insurance_premium/`;
         let requestData = {
             insuranceType: input.insuranceType,
             insurancePremiumFrequency: input.insurancePremiumFrequency,
@@ -81,46 +82,44 @@ function PremiumCalculator({ savedInput, savedErrors, savedResult, setInput, set
     }
 
     return (
-        <div className="calculator-form">
-            <form onSubmit={handleSubmit} noValidate>
-                <CalculatorTraitFieldGroup
-                    insuranceType={input.insuranceType}
-                    insurancePremiumFrequency={input.insurancePremiumFrequency}
-                    gender={input.gender}
-                    handleInput={handleInput}
-                />
-                <CalculatorTimeFieldGroup
-                    insuranceType={input.insuranceType}
-                    birthDate={input.birthDate}
-                    insuranceStartDate={input.insuranceStartDate}
-                    insurancePeriodYears={input.insurancePeriodYears}
-                    insurancePeriodMonths={input.insurancePeriodMonths}
-                    birthDateErrors={errors.birthDate}
-                    insuranceStartDateErrors={errors.insuranceStartDate}
-                    insurancePeriodYearsErrors={errors.insurancePeriodYears}
-                    insurancePeriodMonthsErrors={errors.insurancePeriodMonths}
-                    handleInput={handleInput}
-                />
-                <CalculatorPaymentFieldGroup
-                    insurancePremiumRate={input.insurancePremiumRate}
-                    insuranceLoading={input.insuranceLoading}
-                    insurancePremiumRateErrors={errors.insurancePremiumRate}
-                    insuranceLoadingErrors={errors.insuranceLoading}
-                    insuranceType={input.insuranceType}
-                    handleInput={handleInput}
-                />
-                <CalculatorField labelText="Enter insurance sum:">
-                    <input type="text" inputMode="numeric" pattern={inputFloatPattern} name="insuranceSum" value={input.insuranceSum} onChange={handleInput} />
-                    <CalculatorFieldErrorGroup errors={errors.insuranceSum} insuranceType={input.insuranceType} />
-                </CalculatorField>
-                <button type="submit" disabled={!isButtonActive} className={!isButtonActive ? "disabled" : null}>Calculate</button>
-                {result !== null && (
-                    <div className="result-display">
-                        Insurance premium={result}
-                    </div>
-                )}
-            </form>
-        </div>
+        <React.Fragment>
+            <div className="calculator-form">
+                <form onSubmit={handleSubmit} noValidate>
+                    <CalculatorTraitFieldGroup
+                        insuranceType={input.insuranceType}
+                        insurancePremiumFrequency={input.insurancePremiumFrequency}
+                        gender={input.gender}
+                        handleInput={handleInput}
+                    />
+                    <CalculatorTimeFieldGroup
+                        insuranceType={input.insuranceType}
+                        birthDate={input.birthDate}
+                        insuranceStartDate={input.insuranceStartDate}
+                        insurancePeriodYears={input.insurancePeriodYears}
+                        insurancePeriodMonths={input.insurancePeriodMonths}
+                        birthDateErrors={errors.birthDate}
+                        insuranceStartDateErrors={errors.insuranceStartDate}
+                        insurancePeriodYearsErrors={errors.insurancePeriodYears}
+                        insurancePeriodMonthsErrors={errors.insurancePeriodMonths}
+                        handleInput={handleInput}
+                    />
+                    <CalculatorPaymentFieldGroup
+                        insurancePremiumRate={input.insurancePremiumRate}
+                        insuranceLoading={input.insuranceLoading}
+                        insurancePremiumRateErrors={errors.insurancePremiumRate}
+                        insuranceLoadingErrors={errors.insuranceLoading}
+                        insuranceType={input.insuranceType}
+                        handleInput={handleInput}
+                    />
+                    <CalculatorField labelText="Enter insurance sum:">
+                        <input type="text" inputMode="numeric" pattern={inputFloatPattern} name="insuranceSum" value={input.insuranceSum} onChange={handleInput} />
+                        <CalculatorFieldErrorGroup errors={errors.insuranceSum} insuranceType={input.insuranceType} />
+                    </CalculatorField>
+                    <button type="submit" disabled={!isButtonActive} className={!isButtonActive ? "disabled" : null}>Calculate</button>                  
+                </form>
+            </div>
+            <CalculatorResult result={result} label="Insurance premium" />
+        </React.Fragment>
     );
 }
 

@@ -1,6 +1,6 @@
 .calculator-form {
   font-family: Arial, sans-serif;
-  max-width: 600px;  
+  max-width: 600px;
   margin: 45px auto;
   padding: 20px;
   background-color: #f9f9f9;
@@ -23,12 +23,12 @@ form {
   display: flex;
   flex-direction: column;
   width: calc(100% - 20px);
-  margin: auto; 
+  margin: auto;
   margin-bottom: 15px;
 }
 
 form input,
-form select { 
+form select {
   padding: 8px;
   margin-top: 5px;
   border: 1px solid #ccc;
@@ -42,7 +42,7 @@ form p {
 .period-field-group {
   display: flex;
   flex-direction: row;
-  justify-content: space-evenly;  
+  justify-content: space-evenly;
 }
 
 .period-field-input {
@@ -52,19 +52,19 @@ form p {
   align-items: center;
 }
 
-.period-field { 
+.period-field {
   flex: 1;
 }
 
-.period-field-group * { 
-  width: auto;  
+.period-field-group * {
+  width: auto;
 }
 
-.period-field-group div { 
-  margin: 5px 0px 0px;  
+.period-field-group div {
+  margin: 5px 0px 0px;
 }
 
-.period-field-input input { 
+.period-field-input input {
   margin-left: 15px;
 }
 
@@ -101,11 +101,6 @@ button:not(:disabled):hover {
   cursor: pointer;
 }
 
-.calculator-dropdown:focus {
-  outline: none;
-  border-color: #4caf50;
-}
-
 .result-display {
   margin: 20px auto;
   width: calc(60%);
@@ -126,4 +121,19 @@ button:not(:disabled):hover {
 .disabled {
   background-color: #ccc;
   color: #666;
+}
+
+.calculator-result {
+  max-width: 300px;
+  margin: 45px auto;
+  padding: 10px 20px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font-size: 20px;
+  text-align: center;
+  background-color: #f9f9f9;
+}
+
+.calculator-result p {
+  margin: 0px
 }

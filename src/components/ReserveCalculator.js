@@ -4,6 +4,7 @@ import CalculatorTimeFieldGroup from "./CalculatorTimeFieldGroup.js";
 import CalculatorPaymentFieldGroup from "./CalculatorPaymentFieldGroup.js";
 import PeriodFieldGroup from "./PeriodFieldGroup.js";
 import CalculatorFieldErrorGroup from "./CalculatorFieldErrorGroup.js";
+import CalculatorResult from "./CalculatorResult.js";
 import { inputFloatPattern, REACT_APP_API_URL } from "../utils.js";
 import { getBaseErrors, getCommonErrors, getCommonExcludedFields, removeError, findPreviousCommonError, commonHandleInput } from "../utils.js";
 import { useToggleButton } from "../hooks.js";
@@ -150,97 +151,95 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
     }
 
     return (
-        <div className="calculator-form">
-            <form onSubmit={handleSubmit} noValidate>
-                <CalculatorTraitFieldGroup
-                    insuranceType={input.insuranceType}
-                    insurancePremiumFrequency={input.insurancePremiumFrequency}
-                    gender={input.gender}
-                    handleInput={handleInput}
-                />
-                <CalculatorTimeFieldGroup
-                    insuranceType={input.insuranceType}
-                    birthDate={input.birthDate}
-                    insuranceStartDate={input.insuranceStartDate}
-                    insurancePeriodYears={input.insurancePeriodYears}
-                    insurancePeriodMonths={input.insurancePeriodMonths}
-                    birthDateErrors={errors.birthDate}
-                    insuranceStartDateErrors={errors.insuranceStartDate}
-                    insurancePeriodYearsErrors={errors.insurancePeriodYears}
-                    insurancePeriodMonthsErrors={errors.insurancePeriodMonths}
-                    handleInput={handleInput}
-                />
-                <CalculatorPaymentFieldGroup
-                    insurancePremiumRate={input.insurancePremiumRate}
-                    insuranceLoading={input.insuranceLoading}
-                    insurancePremiumRateErrors={errors.insurancePremiumRate}
-                    insuranceLoadingErrors={errors.insuranceLoading}
-                    insuranceType={input.insuranceType}
-                    handleInput={handleInput}
-                />
-                <div className="field-block">
-                    <div>
-                        <input
-                            type="radio"
-                            name="inputVariable"
-                            value="insurancePremium"
-                            checked={input.inputVariable === "insurancePremium"}
-                            onChange={handleInput}
-                        />
-                        <label>Enter insurance premium:</label>
-                    </div>
-                    <input
-                        type="text"
-                        inputMode="numeric"
-                        pattern={inputFloatPattern}
-                        name="insurancePremium"
-                        value={input.insurancePremium}
-                        onChange={handleInput}
-                        disabled={input.inputVariable !== "insurancePremium"}
+        <React.Fragment>
+            <div className="calculator-form">
+                <form onSubmit={handleSubmit} noValidate>
+                    <CalculatorTraitFieldGroup
+                        insuranceType={input.insuranceType}
+                        insurancePremiumFrequency={input.insurancePremiumFrequency}
+                        gender={input.gender}
+                        handleInput={handleInput}
                     />
-                    <CalculatorFieldErrorGroup errors={errors.insurancePremium} insuranceType={input.insuranceType} />
-                </div>
-                <div className="field-block">
-                    <div>
-                        <input
-                            type="radio"
-                            name="inputVariable"
-                            value="insuranceSum"
-                            checked={input.inputVariable === "insuranceSum"}
-                            onChange={handleInput}
-                        />
-                        <label>Enter insurance sum:</label>
-                    </div>
-                    <input
-                        type="text"
-                        inputMode="numeric"
-                        pattern={inputFloatPattern}
-                        name="insuranceSum"
-                        value={input.insuranceSum}
-                        onChange={handleInput}
-                        disabled={input.inputVariable !== "insuranceSum"}
+                    <CalculatorTimeFieldGroup
+                        insuranceType={input.insuranceType}
+                        birthDate={input.birthDate}
+                        insuranceStartDate={input.insuranceStartDate}
+                        insurancePeriodYears={input.insurancePeriodYears}
+                        insurancePeriodMonths={input.insurancePeriodMonths}
+                        birthDateErrors={errors.birthDate}
+                        insuranceStartDateErrors={errors.insuranceStartDate}
+                        insurancePeriodYearsErrors={errors.insurancePeriodYears}
+                        insurancePeriodMonthsErrors={errors.insurancePeriodMonths}
+                        handleInput={handleInput}
                     />
-                    <CalculatorFieldErrorGroup errors={errors.insuranceSum} insuranceType={input.insuranceType} />
-                </div>
-                <PeriodFieldGroup
-                    labelText="Enter time from insurance start to reserve calculation:"
-                    yearsFieldName="reservePeriodYears"
-                    monthsFieldName="reservePeriodMonths"
-                    yearsField={input.reservePeriodYears}
-                    monthsField={input.reservePeriodMonths}
-                    yearsFieldErrors={errors.reservePeriodYears}
-                    monthsFieldErrors={errors.reservePeriodMonths}
-                    insuranceType={input.insuranceType}
-                    handleInput={handleInput}
-                />
-                <button type="submit" disabled={!isButtonActive} className={!isButtonActive ? "disabled" : null}>Calculate</button>
-                {result !== null && (
-                    <div className="result-display">
-                        Reserve={result}
+                    <CalculatorPaymentFieldGroup
+                        insurancePremiumRate={input.insurancePremiumRate}
+                        insuranceLoading={input.insuranceLoading}
+                        insurancePremiumRateErrors={errors.insurancePremiumRate}
+                        insuranceLoadingErrors={errors.insuranceLoading}
+                        insuranceType={input.insuranceType}
+                        handleInput={handleInput}
+                    />
+                    <div className="field-block">
+                        <div>
+                            <input
+                                type="radio"
+                                name="inputVariable"
+                                value="insurancePremium"
+                                checked={input.inputVariable === "insurancePremium"}
+                                onChange={handleInput}
+                            />
+                            <label>Enter insurance premium:</label>
+                        </div>
+                        <input
+                            type="text"
+                            inputMode="numeric"
+                            pattern={inputFloatPattern}
+                            name="insurancePremium"
+                            value={input.insurancePremium}
+                            onChange={handleInput}
+                            disabled={input.inputVariable !== "insurancePremium"}
+                        />
+                        <CalculatorFieldErrorGroup errors={errors.insurancePremium} insuranceType={input.insuranceType} />
                     </div>
-                )}
-            </form>
-        </div>
+                    <div className="field-block">
+                        <div>
+                            <input
+                                type="radio"
+                                name="inputVariable"
+                                value="insuranceSum"
+                                checked={input.inputVariable === "insuranceSum"}
+                                onChange={handleInput}
+                            />
+                            <label>Enter insurance sum:</label>
+                        </div>
+                        <input
+                            type="text"
+                            inputMode="numeric"
+                            pattern={inputFloatPattern}
+                            name="insuranceSum"
+                            value={input.insuranceSum}
+                            onChange={handleInput}
+                            disabled={input.inputVariable !== "insuranceSum"}
+                        />
+                        <CalculatorFieldErrorGroup errors={errors.insuranceSum} insuranceType={input.insuranceType} />
+                    </div>
+                    <PeriodFieldGroup
+                        labelText="Enter time from insurance start to reserve calculation:"
+                        yearsFieldName="reservePeriodYears"
+                        monthsFieldName="reservePeriodMonths"
+                        yearsField={input.reservePeriodYears}
+                        monthsField={input.reservePeriodMonths}
+                        yearsFieldErrors={errors.reservePeriodYears}
+                        monthsFieldErrors={errors.reservePeriodMonths}
+                        insuranceType={input.insuranceType}
+                        handleInput={handleInput}
+                    />
+                    <button type="submit" disabled={!isButtonActive} className={!isButtonActive ? "disabled" : null}>Calculate</button>
+                </form>
+            </div>
+            <CalculatorResult result={result} label="Reserve" />
+        </React.Fragment>
     );
 }
 
