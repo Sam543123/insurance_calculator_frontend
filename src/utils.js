@@ -109,7 +109,7 @@ function removeError(field, errors, commonError) {
 function getCommonExcludedFields(input) {
     let excludedFields = [];
     if (input.insuranceType === "cumulative insurance") {
-        excludedFields.push("birthDate", "insuranceStartDate");
+        excludedFields.push("birthDate", "insuranceStartDate", "gender");
     } else if (input.insuranceType === "whole life insurance") {
         excludedFields.push("insurancePeriodYears", "insurancePeriodMonths");
     }

@@ -20,13 +20,15 @@ function CalculatorTraitFieldGroup({ insuranceType, insurancePremiumFrequency, g
                     <option>monthly</option>
                 </select>
             </CalculatorField>
-            <CalculatorField labelText="Choose gender of insured person:">
-                <select name="gender" value={gender} onChange={handleInput}>
-                    <option>male</option>
-                    <option>female</option>
-                </select>
-            </CalculatorField>
-        </React.Fragment>
+            {insuranceType !== "cumulative insurance" && (
+                < CalculatorField labelText="Choose gender of insured person:">
+                    <select name="gender" value={gender} onChange={handleInput}>
+                        <option>male</option>
+                        <option>female</option>
+                    </select>
+                </CalculatorField>
+            )}
+        </React.Fragment >
     )
 }
 

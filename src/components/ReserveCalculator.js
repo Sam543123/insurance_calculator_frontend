@@ -119,8 +119,7 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
         const routeURL = `${REACT_APP_API_URL}reserve/`;
         let requestData = {
             insuranceType: input.insuranceType,
-            insurancePremiumFrequency: input.insurancePremiumFrequency,
-            gender: input.gender,
+            insurancePremiumFrequency: input.insurancePremiumFrequency,         
             insurancePremiumRate: input.insurancePremiumRate / 100,
             insuranceLoading: input.insuranceLoading / 100,
         };
@@ -128,6 +127,7 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
         if (input.insuranceType !== "cumulative insurance") {
             requestData.birthDate = input.birthDate;
             requestData.insuranceStartDate = input.insuranceStartDate;
+            requestData.gender = input.gender;
         }
 
         if (input.insuranceType !== "whole life insurance") {

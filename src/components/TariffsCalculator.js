@@ -138,8 +138,7 @@ function TariffsCalculator({ savedInput, savedErrors, setInput, setErrors }) {
         const routeURL = `${REACT_APP_API_URL }tariffs/`;
         let requestData = {
             insuranceType: input.insuranceType,
-            insurancePremiumFrequency: input.insurancePremiumFrequency,
-            gender: input.gender,
+            insurancePremiumFrequency: input.insurancePremiumFrequency,           
             insurancePremiumRate: input.insurancePremiumRate / 100,
             insuranceLoading: input.insuranceLoading / 100,
         };
@@ -147,6 +146,7 @@ function TariffsCalculator({ savedInput, savedErrors, setInput, setErrors }) {
         if (input.insuranceType !== "cumulative insurance") {
             requestData.minimumInsuranceStartAge = input.minimumInsuranceStartAge;
             requestData.maximumInsuranceStartAge = input.maximumInsuranceStartAge;
+            requestData.gender = input.gender;
             if (input.insuranceType !== "whole life insurance") {
                 requestData.maximumInsurancePeriod = 12 * Number(input.maximumInsurancePeriod);
             }
@@ -176,11 +176,11 @@ function TariffsCalculator({ savedInput, savedErrors, setInput, setErrors }) {
                 <React.Fragment>
                     {input.insuranceType !== "cumulative insurance" && (
                         <React.Fragment>
-                            <CalculatorField labelText="Enter minimum insurance start age:">
+                            <CalculatorField labelText="Enter minimum insurance start age in years:">
                                 <input type="text" inputMode="numeric" pattern={inputIntegerPattern} name="minimumInsuranceStartAge" value={input.minimumInsuranceStartAge} onChange={handleInput} />
                                 <CalculatorFieldErrorGroup errors={errors.minimumInsuranceStartAge} insuranceType={input.insuranceType} />
                             </CalculatorField>
-                            <CalculatorField labelText="Enter maximum insurance start age:">
+                            <CalculatorField labelText="Enter maximum insurance start age in years:">
                                 <input type="text" inputMode="numeric" pattern={inputIntegerPattern} name="maximumInsuranceStartAge" value={input.maximumInsuranceStartAge} onChange={handleInput} />
                                 <CalculatorFieldErrorGroup errors={errors.maximumInsuranceStartAge} insuranceType={input.insuranceType} />
                             </CalculatorField>
@@ -189,7 +189,7 @@ function TariffsCalculator({ savedInput, savedErrors, setInput, setErrors }) {
 
                     {input.insuranceType !== "whole life insurance" && (
                         input.insuranceType !== "cumulative insurance" ? (
-                            <CalculatorField labelText="Enter maximum insurance period:">
+                            <CalculatorField labelText="Enter maximum insurance period in years:">
                                 <input type="text" inputMode="numeric" pattern={inputIntegerPattern} name="maximumInsurancePeriod" value={input.maximumInsurancePeriod} onChange={handleInput} />
                                 <CalculatorFieldErrorGroup errors={errors.maximumInsurancePeriod} insuranceType={input.insuranceType} />
                             </CalculatorField>

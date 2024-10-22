@@ -58,8 +58,7 @@ function SumCalculator({ savedInput, savedErrors, savedResult, setInput, setErro
         const routeURL = `${REACT_APP_API_URL}insurance_sum/`;
         let requestData = {
             insuranceType: input.insuranceType,
-            insurancePremiumFrequency: input.insurancePremiumFrequency,
-            gender: input.gender,
+            insurancePremiumFrequency: input.insurancePremiumFrequency,           
             insurancePremiumRate: input.insurancePremiumRate / 100,
             insuranceLoading: input.insuranceLoading / 100,
             insurancePremium: input.insurancePremium
@@ -68,6 +67,7 @@ function SumCalculator({ savedInput, savedErrors, savedResult, setInput, setErro
         if (input.insuranceType !== "cumulative insurance") {
             requestData.birthDate = input.birthDate;
             requestData.insuranceStartDate = input.insuranceStartDate;
+            requestData.gender = input.gender;
         }
 
         if (input.insuranceType !== "whole life insurance") {
