@@ -39,7 +39,7 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
         if (input.inputVariable === "insurancePremium") {
             excludedFields.push("insuranceSum");
         } else if (input.inputVariable === "insuranceSum") {
-            excludedFields.push("insurancePremium");
+            excludedFields.push("insurancePremium", "insuranceLoading");
         }
         return excludedFields
     }, [input])
@@ -120,8 +120,7 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
         let requestData = {
             insuranceType: input.insuranceType,
             insurancePremiumFrequency: input.insurancePremiumFrequency,         
-            insurancePremiumRate: input.insurancePremiumRate / 100,
-            insuranceLoading: input.insuranceLoading / 100,
+            insurancePremiumRate: input.insurancePremiumRate / 100,           
         };
 
         if (input.insuranceType !== "cumulative insurance") {
@@ -136,6 +135,7 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
 
         if (input.inputVariable === "insurancePremium") {
             requestData.insurancePremium = input.insurancePremium;
+            requestData.insuranceLoading = input.insuranceLoading / 100;
         } else {
             requestData.insuranceSum = input.insuranceSum;
         }
@@ -179,6 +179,7 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
                         insuranceLoadingErrors={errors.insuranceLoading}
                         insuranceType={input.insuranceType}
                         handleInput={handleInput}
+                        addInsuranceLoadingField={input.inputVariable === "insurancePremium"}
                     />
                     <div className="field-block">
                         <div>
