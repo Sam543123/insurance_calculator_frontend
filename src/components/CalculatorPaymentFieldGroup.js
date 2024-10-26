@@ -5,6 +5,7 @@ import CalculatorFieldErrorGroup from "./CalculatorFieldErrorGroup.js";
 
 
 function CalculatorPaymentFieldGroup({ insuranceLoading, insurancePremiumRate, insuranceLoadingErrors, insurancePremiumRateErrors, insuranceType, handleInput, addInsuranceLoadingField = true }) {   
+    // Render group of input calculator fields related to payments
     return (
         <React.Fragment>
             <CalculatorField labelText="Enter return rate of insurance premium in %:">

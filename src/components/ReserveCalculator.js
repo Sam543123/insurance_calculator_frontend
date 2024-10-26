@@ -12,6 +12,7 @@ import axios from "axios";
 
 
 function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, setErrors, setResult }) {
+    // Get saved input from props or default input
     const input = savedInput || {
         insuranceType: 'pure endowment',
         insurancePremiumFrequency: 'simultaneously',
@@ -28,12 +29,15 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
         insuranceSum: '',
         insurancePremium: ''
     }
+    // Get saved errors from props or empty error dictionary
     const errors = savedErrors || Object.keys(input).reduce((acc, field) => {
         acc[field] = { fieldErrors: [], personalFieldErrors: false };
         return acc;
     }, {})
+     // Get saved result from props
     const result = savedResult;
 
+    // get fields that are excluded when determining whether "Calculate" button is active
     const getExcludedFields = React.useCallback(() => {
         let excludedFields = getCommonExcludedFields(input);
         if (input.inputVariable === "insurancePremium") {
@@ -43,8 +47,12 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
         }
         return excludedFields
     }, [input])
+
+     // State variable that indicates if "Calculate" button is active
+    // "Calculate" button is active if all fields are filled and there are no input errors
     const isButtonActive = useToggleButton(input, errors, getExcludedFields);
 
+     // validate calculator input
     const validate = (fieldName, updatedInput) => {
         let newErrors = { ...errors, [fieldName]: { fieldErrors: [], personalFieldErrors: false } };
         let fieldsToValidate;
@@ -110,10 +118,12 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
         return newErrors;
     }
 
+    // Update calculator form when user enters data
     const handleInput = (e) => {
         commonHandleInput(e, input, validate, setInput, setErrors);
     };
 
+    // Calculate reserve when "Calculate" button is pressed
     const handleSubmit = async (e) => {
         e.preventDefault();
         const routeURL = `${REACT_APP_API_URL}reserve/`;
@@ -181,6 +191,7 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
                         handleInput={handleInput}
                         addInsuranceLoadingField={input.inputVariable === "insurancePremium"}
                     />
+                    {/* Choose to calculate reserve using insurance premium or insurance sum */}
                     <div className="field-block">
                         <div>
                             <input

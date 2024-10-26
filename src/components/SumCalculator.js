@@ -12,6 +12,7 @@ import axios from "axios";
 
 
 function SumCalculator({ savedInput, savedErrors, savedResult, setInput, setErrors, setResult }) {
+    // Get saved input from props or default input
     const input = savedInput || {
         insuranceType: 'pure endowment',
         insurancePremiumFrequency: 'simultaneously',
@@ -24,14 +25,18 @@ function SumCalculator({ savedInput, savedErrors, savedResult, setInput, setErro
         insuranceLoading: '',
         insurancePremium: ''
     }
+    // Get saved errors from props or empty error dictionary
     const errors = savedErrors || Object.keys(input).reduce((acc, field) => {
         acc[field] = { fieldErrors: [], personalFieldErrors: false };
         return acc;
     }, {})
+     // Get saved result from props
     const result = savedResult;
+     // State variable that indicates if "Calculate" button is active
+    // "Calculate" button is active if all fields are filled and there are no input errors
     const isButtonActive = useToggleButton(input, errors, getCommonExcludedFields);
 
-
+     // validate calculator input
     const validate = (fieldName, updatedInput) => {
         let newErrors = { ...errors, [fieldName]: { fieldErrors: [], personalFieldErrors: false } };
         newErrors = getBaseErrors(fieldName, updatedInput, newErrors);
@@ -47,12 +52,12 @@ function SumCalculator({ savedInput, savedErrors, savedResult, setInput, setErro
         return newErrors;
     }
 
-
+    // Update calculator form when user enters data
     const handleInput = (e) => {
         commonHandleInput(e, input, validate, setInput, setErrors);
     };
 
-
+    // Calculate insurance sum when "Calculate" button is pressed
     const handleSubmit = async (e) => {
         e.preventDefault();
         const routeURL = `${REACT_APP_API_URL}insurance_sum/`;

@@ -4,6 +4,7 @@ import { inputIntegerPattern } from "../utils.js";
 import CalculatorFieldErrorGroup from "./CalculatorFieldErrorGroup.js";
 
 function PeriodFieldGroup(props) {
+    // Render group of years and months fields with label
     return (
         <CalculatorField labelText={props.labelText}>
             <div className="period-field-group">

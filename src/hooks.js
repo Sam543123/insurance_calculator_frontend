@@ -1,5 +1,6 @@
 import React from 'react';
 
+// Switch button to active state if target fields are filled and don't have errors
 function useToggleButton(input, errors, getExcludedFields) {
     const [isButtonActive, setIsButtonActive] = React.useState(false);
     React.useLayoutEffect(() => {

@@ -12,6 +12,7 @@ import { saveAs } from "file-saver";
 
 
 function TariffsCalculator({ savedInput, savedErrors, setInput, setErrors }) {
+    // Get saved input from props or default input
     const input = savedInput || {
         insuranceType: 'pure endowment',
         insurancePremiumFrequency: 'simultaneously',
@@ -24,6 +25,7 @@ function TariffsCalculator({ savedInput, savedErrors, setInput, setErrors }) {
         maximumInsurancePeriodYears: '',
         maximumInsurancePeriodMonths: '',
     }
+    // Get saved errors from props or empty error dictionary
     const errors = savedErrors || Object.keys(input).reduce((acc, field) => {
         acc[field] = { fieldErrors: [], personalFieldErrors: false };
         return acc;
@@ -42,9 +44,11 @@ function TariffsCalculator({ savedInput, savedErrors, setInput, setErrors }) {
         }
         return excludedFields
     }, [input])
+     // State variable that indicates if "Calculate" button is active
+    // "Calculate" button is active if all fields are filled and there are no input errors
     const isButtonActive = useToggleButton(input, errors, getExcludedFields);
 
-
+     // validate calculator input
     const validate = (fieldName, updatedInput) => {
         let newErrors = { ...errors, [fieldName]: { fieldErrors: [], personalFieldErrors: false } };
         let fieldsToValidate;
@@ -127,12 +131,12 @@ function TariffsCalculator({ savedInput, savedErrors, setInput, setErrors }) {
         return newErrors;
     }
 
-
+    // Update calculator form when user enters data
     const handleInput = (e) => {
         commonHandleInput(e, input, validate, setInput, setErrors);
     };
 
-
+    // Build tariffs table when "Calculate" button is pressed
     const handleSubmit = async (e) => {
         e.preventDefault();
         const routeURL = `${REACT_APP_API_URL }tariffs/`;

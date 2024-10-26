@@ -4,6 +4,7 @@ import PeriodFieldGroup from "./PeriodFieldGroup.js";
 import CalculatorFieldErrorGroup from "./CalculatorFieldErrorGroup.js";
 
 function CalculatorTimeFieldGroup(props) {
+    // Render group of input calculator fields related to time
     return (
         <React.Fragment>
             {props.insuranceType !== "cumulative insurance" && (

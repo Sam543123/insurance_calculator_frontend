@@ -1,6 +1,7 @@
 import React from "react";
 
 function CalculatorFieldErrorGroup({ errors, insuranceType }) {
+    // Render all errors for calculator input field related to specific insurance type
     return (
         <React.Fragment>
             {errors && <div className="error">{errors.fieldErrors.filter(

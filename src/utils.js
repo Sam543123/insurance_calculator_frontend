@@ -1,9 +1,13 @@
 import moment from 'moment';
 
+// URL of calculator backend API
 const REACT_APP_API_URL  = process.env.REACT_APP_API_URL || "http://localhost:8000/calculate/";
+// Pattern that allows to enter only non-negative integer numbers to calculator input fields
 const inputIntegerPattern = "[0-9]*";
+// Pattern that allows to enter only non-negative float numbers to calculator input fields
 const inputFloatPattern = "([0-9]+\\.?[0-9]*)?";
 
+// Get errors common for all calculation types
 function getBaseErrors(fieldName, updatedInput, errors) {
     let newErrors = { ...errors };
     if (fieldName === "insuranceLoading") {
@@ -15,12 +19,18 @@ function getBaseErrors(fieldName, updatedInput, errors) {
     return newErrors;
 }
 
+// Get errors common for all calculation types except tariffs calculation
 function getCommonErrors(fieldName, updatedInput, errors) {
     let newErrors = { ...errors };
     let commonErrorMessage;
     let personalFieldInputCorrect;
     let previousCommonErrorField;
     const currentDate = new Date();
+    // Errors can be either personal (for one field) or common (for several fields)
+    // Common errors are added only if all input fields related to this error are filled and don't have personal errors
+    // Common errors are added to last field modifed by user  
+    // removeError function is used to remove previous common error if related input is correct or there is personal error
+    // fieldsToValidate stores group of fields that can have common errors    /
     let fieldsToValidate = ["birthDate", "insuranceStartDate"];
     if (fieldsToValidate.includes(fieldName)) {
         if (fieldName === "birthDate") {
@@ -28,10 +38,10 @@ function getCommonErrors(fieldName, updatedInput, errors) {
                 newErrors[fieldName].fieldErrors.push({ message: "Birth date can't be later than current moment.", excludedInsuranceTypes: ["cumulative insurance"] });
                 newErrors[fieldName].personalFieldErrors = true;
             }
-        }
+        }        
         commonErrorMessage = "Birth date can't be later than insurance start date."
         previousCommonErrorField = findPreviousCommonError(fieldsToValidate, newErrors, commonErrorMessage);
-        personalFieldInputCorrect = fieldsToValidate.every((f) => newErrors[f].personalFieldErrors === false && updatedInput[f] !== "");
+        personalFieldInputCorrect = fieldsToValidate.every((f) => newErrors[f].personalFieldErrors === false && updatedInput[f] !== "");        
         if (personalFieldInputCorrect) {
             if (Date.parse(updatedInput.birthDate) > Date.parse(updatedInput.insuranceStartDate)) {
                 if (previousCommonErrorField === null) {
@@ -91,6 +101,7 @@ function getCommonErrors(fieldName, updatedInput, errors) {
 }
 
 function findPreviousCommonError(fieldsToValidate, errors, commonError) {
+    // Get field that common error is related to
     for (let f of fieldsToValidate) {
         if (errors[f].fieldErrors.some((e) => e.message === commonError)) {
             return f;
@@ -99,14 +110,16 @@ function findPreviousCommonError(fieldsToValidate, errors, commonError) {
     return null;
 }
 
-function removeError(field, errors, commonError) {
+function removeError(field, errors, targetError) {
+    // Remove outdated error from list of errors related to specific field
     if (field === null) {
         return;
     }
-    errors[field].fieldErrors = errors[field].fieldErrors.filter((e) => (e.message !== commonError));
+    errors[field].fieldErrors = errors[field].fieldErrors.filter((e) => (e.message !== targetError));
 }
 
 function getCommonExcludedFields(input) {
+    // Get common fields that are excluded when determining whether "Calculate" button is active
     let excludedFields = [];
     if (input.insuranceType === "cumulative insurance") {
         excludedFields.push("birthDate", "insuranceStartDate", "gender");
@@ -118,6 +131,8 @@ function getCommonExcludedFields(input) {
 }
 
 const commonHandleInput = (e, input, validate, setInput, setErrors) => {
+    // Update input and errors based on data enterd by user into onput field
+    // Block entering forbidden symbols into calculator input fields
     if (!e.target.validity.valid) {
         return;
     }

@@ -6,7 +6,10 @@ import ReserveCalculator from './components/ReserveCalculator.js';
 import TariffsCalculator from './components/TariffsCalculator.js';
 
 function App() {
+  // Value that user wants to calculate
+  // It is used to switch between different calculator forms
   const [target, setTarget] = React.useState("insurancePremium")
+  // Store here calculators' inputs, errors and results to keep them when switching between different calculators
   const [premiumCalculatorInput, setPremiumCalculatorInput] = React.useState(null);
   const [sumCalculatorInput, setSumCalculatorInput] = React.useState(null);
   const [reserveCalculatorInput, setReserveCalculatorInput] = React.useState(null);
@@ -18,7 +21,9 @@ function App() {
   const [premiumCalculatorResult, setPremiumCalculatorResult] = React.useState(null);
   const [sumCalculatorResult, setSumCalculatorResult] = React.useState(null);
   const [reserveCalculatorResult, setReserveCalculatorResult] = React.useState(null);
+  // dictionary of target values and their labels
   const targetsDictionary = { insurancePremium: "Insurance premium", insuranceSum: "Insurance sum", reserve: "Reserve", tariffs: "Tariffs" };
+  
   const handleChooseTarget = (e) => {
     const value = e.target.value;
     setTarget(value);
@@ -30,6 +35,7 @@ function App() {
         <label>
           <h1>Calculate</h1>
         </label>
+        {/* render drop down list of target values */}
         <select className="calculator-dropdown" selected={target} onChange={handleChooseTarget}>
           {Object.entries(targetsDictionary).map(([target, optionLabel]) => (
             <option key={target} value={target}>
@@ -38,6 +44,7 @@ function App() {
           ))}
         </select>
       </div>
+      {/* render one of calculator forms depending on target choosen by user */}
       {target === "insurancePremium" && (
         <PremiumCalculator
           savedInput={premiumCalculatorInput}

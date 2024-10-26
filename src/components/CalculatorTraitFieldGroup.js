@@ -3,6 +3,7 @@ import CalculatorField from "./CalculatorField.js";
 
 
 function CalculatorTraitFieldGroup({ insuranceType, insurancePremiumFrequency, gender, handleInput }) {
+    // Render group of start input calculator fields
     return (
         <React.Fragment>
             <CalculatorField labelText="Choose insurance type:">
