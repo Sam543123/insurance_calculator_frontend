@@ -5,6 +5,7 @@ import CalculatorTimeFieldGroup from "./CalculatorTimeFieldGroup.js";
 import CalculatorPaymentFieldGroup from "./CalculatorPaymentFieldGroup.js";
 import CalculatorFieldErrorGroup from "./CalculatorFieldErrorGroup.js";
 import CalculatorResult from "./CalculatorResult.js";
+import CalculationButton from "./CalculationButton.js";
 import { getBaseErrors, getCommonErrors, getCommonExcludedFields, commonHandleInput } from "../utils.js";
 import { useToggleButton } from "../hooks.js";
 import { inputFloatPattern, REACT_APP_API_URL } from "../utils.js";
@@ -30,13 +31,13 @@ function SumCalculator({ savedInput, savedErrors, savedResult, setInput, setErro
         acc[field] = { fieldErrors: [], personalFieldErrors: false };
         return acc;
     }, {})
-     // Get saved result from props
+    // Get saved result from props
     const result = savedResult;
-     // State variable that indicates if "Calculate" button is active
+    // State variable that indicates if "Calculate" button is active
     // "Calculate" button is active if all fields are filled and there are no input errors
     const isButtonActive = useToggleButton(input, errors, getCommonExcludedFields);
 
-     // validate calculator input
+    // validate calculator input
     const validate = (fieldName, updatedInput) => {
         let newErrors = { ...errors, [fieldName]: { fieldErrors: [], personalFieldErrors: false } };
         newErrors = getBaseErrors(fieldName, updatedInput, newErrors);
@@ -63,7 +64,7 @@ function SumCalculator({ savedInput, savedErrors, savedResult, setInput, setErro
         const routeURL = `${REACT_APP_API_URL}insurance_sum/`;
         let requestData = {
             insuranceType: input.insuranceType,
-            insurancePremiumFrequency: input.insurancePremiumFrequency,           
+            insurancePremiumFrequency: input.insurancePremiumFrequency,
             insurancePremiumRate: input.insurancePremiumRate / 100,
             insuranceLoading: input.insuranceLoading / 100,
             insurancePremium: input.insurancePremium
@@ -122,7 +123,7 @@ function SumCalculator({ savedInput, savedErrors, savedResult, setInput, setErro
                         <input type="text" inputMode="numeric" pattern={inputFloatPattern} name="insurancePremium" value={input.insurancePremium} onChange={handleInput} />
                         <CalculatorFieldErrorGroup errors={errors.insurancePremium} insuranceType={input.insuranceType} />
                     </CalculatorField>
-                    <button type="submit" disabled={!isButtonActive} className={!isButtonActive ? "disabled" : null}>Calculate</button>                   
+                    <CalculationButton isButtonActive={isButtonActive} />
                 </form>
             </div>
             <CalculatorResult result={result} label="Insurance sum" />

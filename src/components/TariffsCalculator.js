@@ -4,14 +4,17 @@ import CalculatorTraitFieldGroup from "./CalculatorTraitFieldGroup.js";
 import CalculatorPaymentFieldGroup from "./CalculatorPaymentFieldGroup.js";
 import PeriodFieldGroup from "./PeriodFieldGroup.js";
 import CalculatorFieldErrorGroup from "./CalculatorFieldErrorGroup.js";
-import { inputIntegerPattern, REACT_APP_API_URL  } from "../utils.js";
+import CalculationButton from "./CalculationButton.js";
+import { inputIntegerPattern, REACT_APP_API_URL } from "../utils.js";
 import { getBaseErrors, removeError, findPreviousCommonError, commonHandleInput } from "../utils.js";
 import { useToggleButton } from "../hooks.js";
 import axios from "axios";
 import { saveAs } from "file-saver";
+import { useTranslation } from "react-i18next";
 
 
 function TariffsCalculator({ savedInput, savedErrors, setInput, setErrors }) {
+    const { i18n } = useTranslation();
     // Get saved input from props or default input
     const input = savedInput || {
         insuranceType: 'pure endowment',
@@ -44,11 +47,11 @@ function TariffsCalculator({ savedInput, savedErrors, setInput, setErrors }) {
         }
         return excludedFields
     }, [input])
-     // State variable that indicates if "Calculate" button is active
+    // State variable that indicates if "Calculate" button is active
     // "Calculate" button is active if all fields are filled and there are no input errors
     const isButtonActive = useToggleButton(input, errors, getExcludedFields);
 
-     // validate calculator input
+    // validate calculator input
     const validate = (fieldName, updatedInput) => {
         let newErrors = { ...errors, [fieldName]: { fieldErrors: [], personalFieldErrors: false } };
         let fieldsToValidate;
@@ -139,12 +142,13 @@ function TariffsCalculator({ savedInput, savedErrors, setInput, setErrors }) {
     // Build tariffs table when "Calculate" button is pressed
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const routeURL = `${REACT_APP_API_URL }tariffs/`;
+        const routeURL = `${REACT_APP_API_URL}tariffs/`;
         let requestData = {
             insuranceType: input.insuranceType,
-            insurancePremiumFrequency: input.insurancePremiumFrequency,           
+            insurancePremiumFrequency: input.insurancePremiumFrequency,
             insurancePremiumRate: input.insurancePremiumRate / 100,
             insuranceLoading: input.insuranceLoading / 100,
+            responseLanguageCode: i18n.language
         };
 
         if (input.insuranceType !== "cumulative insurance") {
@@ -220,7 +224,7 @@ function TariffsCalculator({ savedInput, savedErrors, setInput, setErrors }) {
                     insuranceType={input.insuranceType}
                     handleInput={handleInput}
                 />
-                <button type="submit" disabled={!isButtonActive} className={!isButtonActive ? "disabled" : null}>Calculate</button>
+                <CalculationButton isButtonActive={isButtonActive} />
             </form>
         </div>
     );

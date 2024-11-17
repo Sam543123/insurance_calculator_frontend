@@ -5,13 +5,16 @@ import CalculatorPaymentFieldGroup from "./CalculatorPaymentFieldGroup.js";
 import PeriodFieldGroup from "./PeriodFieldGroup.js";
 import CalculatorFieldErrorGroup from "./CalculatorFieldErrorGroup.js";
 import CalculatorResult from "./CalculatorResult.js";
+import CalculationButton from "./CalculationButton.js";
 import { inputFloatPattern, REACT_APP_API_URL } from "../utils.js";
 import { getBaseErrors, getCommonErrors, getCommonExcludedFields, removeError, findPreviousCommonError, commonHandleInput } from "../utils.js";
 import { useToggleButton } from "../hooks.js";
 import axios from "axios";
+import { useTranslation } from "react-i18next";
 
 
 function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, setErrors, setResult }) {
+    const { t } = useTranslation();
     // Get saved input from props or default input
     const input = savedInput || {
         insuranceType: 'pure endowment',
@@ -34,7 +37,7 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
         acc[field] = { fieldErrors: [], personalFieldErrors: false };
         return acc;
     }, {})
-     // Get saved result from props
+    // Get saved result from props
     const result = savedResult;
 
     // get fields that are excluded when determining whether "Calculate" button is active
@@ -48,11 +51,11 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
         return excludedFields
     }, [input])
 
-     // State variable that indicates if "Calculate" button is active
+    // State variable that indicates if "Calculate" button is active
     // "Calculate" button is active if all fields are filled and there are no input errors
     const isButtonActive = useToggleButton(input, errors, getExcludedFields);
 
-     // validate calculator input
+    // validate calculator input
     const validate = (fieldName, updatedInput) => {
         let newErrors = { ...errors, [fieldName]: { fieldErrors: [], personalFieldErrors: false } };
         let fieldsToValidate;
@@ -129,8 +132,8 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
         const routeURL = `${REACT_APP_API_URL}reserve/`;
         let requestData = {
             insuranceType: input.insuranceType,
-            insurancePremiumFrequency: input.insurancePremiumFrequency,         
-            insurancePremiumRate: input.insurancePremiumRate / 100,           
+            insurancePremiumFrequency: input.insurancePremiumFrequency,
+            insurancePremiumRate: input.insurancePremiumRate / 100,
         };
 
         if (input.insuranceType !== "cumulative insurance") {
@@ -201,7 +204,7 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
                                 checked={input.inputVariable === "insurancePremium"}
                                 onChange={handleInput}
                             />
-                            <label>Enter insurance premium:</label>
+                            <label>{t("Enter insurance premium:")}</label>
                         </div>
                         <input
                             type="text"
@@ -223,7 +226,7 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
                                 checked={input.inputVariable === "insuranceSum"}
                                 onChange={handleInput}
                             />
-                            <label>Enter insurance sum:</label>
+                            <label>{t("Enter insurance sum:")}</label>
                         </div>
                         <input
                             type="text"
@@ -247,7 +250,7 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
                         insuranceType={input.insuranceType}
                         handleInput={handleInput}
                     />
-                    <button type="submit" disabled={!isButtonActive} className={!isButtonActive ? "disabled" : null}>Calculate</button>
+                    <CalculationButton isButtonActive={isButtonActive} />
                 </form>
             </div>
             <CalculatorResult result={result} label="Reserve" />

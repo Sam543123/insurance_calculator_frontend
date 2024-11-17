@@ -2,16 +2,18 @@ import React from "react";
 import CalculatorField from "./CalculatorField.js";
 import { inputIntegerPattern } from "../utils.js";
 import CalculatorFieldErrorGroup from "./CalculatorFieldErrorGroup.js";
+import { useTranslation } from "react-i18next";
 
 function PeriodFieldGroup(props) {
     // Render group of years and months fields with label
+    const { t } = useTranslation()
     return (
         <CalculatorField labelText={props.labelText}>
             <div className="period-field-group">
                 <div className="period-field">
                     <div className="period-field-input">
                         <label>
-                            years
+                            {t("years")}
                         </label>
                         <input type="text" inputMode="numeric" pattern={inputIntegerPattern} name={props.yearsFieldName} value={props.yearsField} onChange={props.handleInput} />
                     </div>
@@ -20,7 +22,7 @@ function PeriodFieldGroup(props) {
                 <div className="period-field">
                     <div className="period-field-input">
                         <label>
-                            months
+                            {t("months")}
                         </label>
                         <input type="text" inputMode="numeric" pattern={inputIntegerPattern} name={props.monthsFieldName} value={props.monthsField} onChange={props.handleInput} />
                     </div>

@@ -3,8 +3,7 @@ import CalculatorField from "./CalculatorField.js";
 import { inputFloatPattern } from "../utils.js";
 import CalculatorFieldErrorGroup from "./CalculatorFieldErrorGroup.js";
 
-
-function CalculatorPaymentFieldGroup({ insuranceLoading, insurancePremiumRate, insuranceLoadingErrors, insurancePremiumRateErrors, insuranceType, handleInput, addInsuranceLoadingField = true }) {   
+function CalculatorPaymentFieldGroup({ insuranceLoading, insurancePremiumRate, insuranceLoadingErrors, insurancePremiumRateErrors, insuranceType, handleInput, addInsuranceLoadingField = true }) {
     // Render group of input calculator fields related to payments
     return (
         <React.Fragment>

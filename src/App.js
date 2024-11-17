@@ -4,8 +4,11 @@ import PremiumCalculator from './components/PremiumCalculator.js';
 import SumCalculator from './components/SumCalculator.js';
 import ReserveCalculator from './components/ReserveCalculator.js';
 import TariffsCalculator from './components/TariffsCalculator.js';
+import LanguageSwitchButton from './components/LanguageSwitchButton.js';
+import { useTranslation } from "react-i18next";
 
 function App() {
+  const { t } = useTranslation();  
   // Value that user wants to calculate
   // It is used to switch between different calculator forms
   const [target, setTarget] = React.useState("insurancePremium")
@@ -22,7 +25,12 @@ function App() {
   const [sumCalculatorResult, setSumCalculatorResult] = React.useState(null);
   const [reserveCalculatorResult, setReserveCalculatorResult] = React.useState(null);
   // dictionary of target values and their labels
-  const targetsDictionary = { insurancePremium: "Insurance premium", insuranceSum: "Insurance sum", reserve: "Reserve", tariffs: "Tariffs" };
+  const targetsDictionary = { 
+    insurancePremium: t("Insurance premium"), 
+    insuranceSum: t("Insurance sum"), 
+    reserve: t("Reserve"), 
+    tariffs: t("Tariffs") 
+  };
   
   const handleChooseTarget = (e) => {
     const value = e.target.value;
@@ -31,9 +39,10 @@ function App() {
 
   return (
     <React.Fragment>
+      <LanguageSwitchButton />
       <div className="choose-value-block">
         <label>
-          <h1>Calculate</h1>
+          <h1>{t("Calculate")}</h1>
         </label>
         {/* render drop down list of target values */}
         <select className="calculator-dropdown" selected={target} onChange={handleChooseTarget}>

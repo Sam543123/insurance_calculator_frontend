@@ -1,9 +1,11 @@
 import React from 'react';
+import { useTranslation } from "react-i18next";
 
 function CalculatorResult({ label, result }) {
+  const { t } = useTranslation();
   return (
     <div className="calculator-result">       
-        <p>{label}={result || "?"}</p>       
+        <p>{t(label)}={result || "?"}</p>       
     </div>
   );
 }

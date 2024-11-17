@@ -5,6 +5,7 @@ import CalculatorTimeFieldGroup from "./CalculatorTimeFieldGroup.js";
 import CalculatorPaymentFieldGroup from "./CalculatorPaymentFieldGroup.js";
 import CalculatorFieldErrorGroup from "./CalculatorFieldErrorGroup.js";
 import CalculatorResult from "./CalculatorResult.js";
+import CalculationButton from "./CalculationButton.js";
 import { getBaseErrors, getCommonErrors, getCommonExcludedFields, commonHandleInput } from "../utils.js";
 import { useToggleButton } from "../hooks.js";
 import { inputFloatPattern, REACT_APP_API_URL } from "../utils.js";
@@ -57,11 +58,11 @@ function PremiumCalculator({ savedInput, savedErrors, savedResult, setInput, set
 
     // Calculate insurance premium when "Calculate" button is pressed
     const handleSubmit = async (e) => {
-        e.preventDefault();       
+        e.preventDefault();
         const routeURL = `${REACT_APP_API_URL}insurance_premium/`;
         let requestData = {
             insuranceType: input.insuranceType,
-            insurancePremiumFrequency: input.insurancePremiumFrequency,           
+            insurancePremiumFrequency: input.insurancePremiumFrequency,
             insurancePremiumRate: input.insurancePremiumRate / 100,
             insuranceLoading: input.insuranceLoading / 100,
             insuranceSum: input.insuranceSum
@@ -119,7 +120,7 @@ function PremiumCalculator({ savedInput, savedErrors, savedResult, setInput, set
                         <input type="text" inputMode="numeric" pattern={inputFloatPattern} name="insuranceSum" value={input.insuranceSum} onChange={handleInput} />
                         <CalculatorFieldErrorGroup errors={errors.insuranceSum} insuranceType={input.insuranceType} />
                     </CalculatorField>
-                    <button type="submit" disabled={!isButtonActive} className={!isButtonActive ? "disabled" : null}>Calculate</button>                  
+                    <CalculationButton isButtonActive={isButtonActive} />
                 </form>
             </div>
             <CalculatorResult result={result} label="Insurance premium" />
