@@ -5,13 +5,14 @@ import SumCalculator from './components/SumCalculator.js';
 import ReserveCalculator from './components/ReserveCalculator.js';
 import TariffsCalculator from './components/TariffsCalculator.js';
 import LanguageSwitchButton from './components/LanguageSwitchButton.js';
+import Select from './components/Select.js';
 import { useTranslation } from "react-i18next";
 
 function App() {
-  const { t } = useTranslation();  
+  const { t } = useTranslation();
   // Value that user wants to calculate
   // It is used to switch between different calculator forms
-  const [target, setTarget] = React.useState("insurancePremium")
+  const [target, setTarget] = React.useState("Insurance premium")
   // Store here calculators' inputs, errors and results to keep them when switching between different calculators
   const [premiumCalculatorInput, setPremiumCalculatorInput] = React.useState(null);
   const [sumCalculatorInput, setSumCalculatorInput] = React.useState(null);
@@ -23,15 +24,9 @@ function App() {
   const [tariffsCalculatorErrors, setTariffsCalculatorErrors] = React.useState(null);
   const [premiumCalculatorResult, setPremiumCalculatorResult] = React.useState(null);
   const [sumCalculatorResult, setSumCalculatorResult] = React.useState(null);
-  const [reserveCalculatorResult, setReserveCalculatorResult] = React.useState(null);
-  // dictionary of target values and their labels
-  const targetsDictionary = { 
-    insurancePremium: t("Insurance premium"), 
-    insuranceSum: t("Insurance sum"), 
-    reserve: t("Reserve"), 
-    tariffs: t("Tariffs") 
-  };
-  
+  const [reserveCalculatorResult, setReserveCalculatorResult] = React.useState(null); 
+  const targets = ["Insurance premium", "Insurance sum", "Reserve", "Tariffs"]
+
   const handleChooseTarget = (e) => {
     const value = e.target.value;
     setTarget(value);
@@ -45,16 +40,15 @@ function App() {
           <h1>{t("Calculate")}</h1>
         </label>
         {/* render drop down list of target values */}
-        <select className="calculator-dropdown" selected={target} onChange={handleChooseTarget}>
-          {Object.entries(targetsDictionary).map(([target, optionLabel]) => (
-            <option key={target} value={target}>
-              {optionLabel}
-            </option>
-          ))}
-        </select>
+        <Select
+          options={targets}
+          selected={target}
+          onChange={handleChooseTarget}
+          className="calculator-dropdown"
+        />
       </div>
       {/* render one of calculator forms depending on target choosen by user */}
-      {target === "insurancePremium" && (
+      {target === "Insurance premium" && (
         <PremiumCalculator
           savedInput={premiumCalculatorInput}
           savedErrors={premiumCalculatorErrors}
@@ -64,7 +58,7 @@ function App() {
           setResult={setPremiumCalculatorResult}
         />
       )}
-      {target === "insuranceSum" && (
+      {target === "Insurance sum" && (
         <SumCalculator
           savedInput={sumCalculatorInput}
           savedErrors={sumCalculatorErrors}
@@ -74,7 +68,7 @@ function App() {
           setResult={setSumCalculatorResult}
         />
       )}
-      {target === "reserve" && (
+      {target === "Reserve" && (
         <ReserveCalculator
           savedInput={reserveCalculatorInput}
           savedErrors={reserveCalculatorErrors}
@@ -84,7 +78,7 @@ function App() {
           setResult={setReserveCalculatorResult}
         />
       )}
-      {target === "tariffs" && (
+      {target === "Tariffs" && (
         <TariffsCalculator
           savedInput={tariffsCalculatorInput}
           savedErrors={tariffsCalculatorErrors}
