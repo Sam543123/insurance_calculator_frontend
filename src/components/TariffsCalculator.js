@@ -64,7 +64,7 @@ function TariffsCalculator({ savedInput, savedErrors, setInput, setErrors }) {
         if (fieldsToValidate.includes(fieldName)) {
             if (fieldName === "maximumInsurancePeriodMonths") {
                 if (updatedInput.maximumInsurancePeriodMonths !== "" && Number(updatedInput.maximumInsurancePeriodMonths) > 11) {
-                    newErrors[fieldName].fieldErrors.push({ message: "Number of months in maximum insurance period must be less than 12.", excludedInsuranceTypes: ["pure endowment", "cumulative insurance", "whole life insurance"] });
+                    newErrors[fieldName].fieldErrors.push({ message: "Number of months in maximum insurance period must be less than 12.", excludedInsuranceTypes: ["pure endowment", "term life insurance", "whole life insurance"] });
                     newErrors[fieldName].personalFieldErrors = true;
                 }
             }
