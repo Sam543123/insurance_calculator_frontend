@@ -20,7 +20,7 @@ function TariffsCalculator({ savedInput, savedErrors, setInput, setErrors }) {
         insuranceType: 'pure endowment',
         insurancePremiumFrequency: 'simultaneously',
         gender: 'male',
-        insurancePremiumRate: '',
+        technicalInterestRate: '',
         insuranceLoading: '',
         minimumInsuranceStartAge: '',
         maximumInsuranceStartAge: '',
@@ -146,7 +146,7 @@ function TariffsCalculator({ savedInput, savedErrors, setInput, setErrors }) {
         let requestData = {
             insuranceType: input.insuranceType,
             insurancePremiumFrequency: input.insurancePremiumFrequency,
-            insurancePremiumRate: input.insurancePremiumRate / 100,
+            technicalInterestRate: input.technicalInterestRate / 100,
             insuranceLoading: input.insuranceLoading / 100,
             responseLanguageCode: i18n.language
         };
@@ -217,9 +217,9 @@ function TariffsCalculator({ savedInput, savedErrors, setInput, setErrors }) {
                     )}
                 </React.Fragment>
                 <CalculatorPaymentFieldGroup
-                    insurancePremiumRate={input.insurancePremiumRate}
+                    technicalInterestRate={input.technicalInterestRate}
                     insuranceLoading={input.insuranceLoading}
-                    insurancePremiumRateErrors={errors.insurancePremiumRate}
+                    technicalInterestRateErrors={errors.technicalInterestRate}
                     insuranceLoadingErrors={errors.insuranceLoading}
                     insuranceType={input.insuranceType}
                     handleInput={handleInput}

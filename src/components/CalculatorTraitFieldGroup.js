@@ -18,7 +18,7 @@ function CalculatorTraitFieldGroup({ insuranceType, insurancePremiumFrequency, g
                     name="insuranceType"
                 />
             </CalculatorField>
-            <CalculatorField labelText="Choose payment frequency:">
+            <CalculatorField labelText="Choose insurance premium payment frequency:">
                 <Select
                     options={insurancePremiumFrequencyChoices}
                     selected={insurancePremiumFrequency}

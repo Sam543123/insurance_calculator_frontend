@@ -21,7 +21,7 @@ function PremiumCalculator({ savedInput, savedErrors, savedResult, setInput, set
         insuranceStartDate: '',
         insurancePeriodYears: '',
         insurancePeriodMonths: '',
-        insurancePremiumRate: '',
+        technicalInterestRate: '',
         insuranceLoading: '',
         insuranceSum: ''
     }
@@ -63,7 +63,7 @@ function PremiumCalculator({ savedInput, savedErrors, savedResult, setInput, set
         let requestData = {
             insuranceType: input.insuranceType,
             insurancePremiumFrequency: input.insurancePremiumFrequency,
-            insurancePremiumRate: input.insurancePremiumRate / 100,
+            technicalInterestRate: input.technicalInterestRate / 100,
             insuranceLoading: input.insuranceLoading / 100,
             insuranceSum: input.insuranceSum
         };
@@ -109,9 +109,9 @@ function PremiumCalculator({ savedInput, savedErrors, savedResult, setInput, set
                         handleInput={handleInput}
                     />
                     <CalculatorPaymentFieldGroup
-                        insurancePremiumRate={input.insurancePremiumRate}
+                        technicalInterestRate={input.technicalInterestRate}
                         insuranceLoading={input.insuranceLoading}
-                        insurancePremiumRateErrors={errors.insurancePremiumRate}
+                        technicalInterestRateErrors={errors.technicalInterestRate}
                         insuranceLoadingErrors={errors.insuranceLoading}
                         insuranceType={input.insuranceType}
                         handleInput={handleInput}

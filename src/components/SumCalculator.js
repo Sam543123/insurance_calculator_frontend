@@ -22,7 +22,7 @@ function SumCalculator({ savedInput, savedErrors, savedResult, setInput, setErro
         insuranceStartDate: '',
         insurancePeriodYears: '',
         insurancePeriodMonths: '',
-        insurancePremiumRate: '',
+        technicalInterestRate: '',
         insuranceLoading: '',
         insurancePremium: ''
     }
@@ -65,7 +65,7 @@ function SumCalculator({ savedInput, savedErrors, savedResult, setInput, setErro
         let requestData = {
             insuranceType: input.insuranceType,
             insurancePremiumFrequency: input.insurancePremiumFrequency,
-            insurancePremiumRate: input.insurancePremiumRate / 100,
+            technicalInterestRate: input.technicalInterestRate / 100,
             insuranceLoading: input.insuranceLoading / 100,
             insurancePremium: input.insurancePremium
         };
@@ -112,9 +112,9 @@ function SumCalculator({ savedInput, savedErrors, savedResult, setInput, setErro
                         handleInput={handleInput}
                     />
                     <CalculatorPaymentFieldGroup
-                        insurancePremiumRate={input.insurancePremiumRate}
+                        technicalInterestRate={input.technicalInterestRate}
                         insuranceLoading={input.insuranceLoading}
-                        insurancePremiumRateErrors={errors.insurancePremiumRate}
+                        technicalInterestRateErrors={errors.technicalInterestRate}
                         insuranceLoadingErrors={errors.insuranceLoading}
                         insuranceType={input.insuranceType}
                         handleInput={handleInput}

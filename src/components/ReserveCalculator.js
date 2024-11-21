@@ -24,7 +24,7 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
         insuranceStartDate: '',
         insurancePeriodYears: '',
         insurancePeriodMonths: '',
-        insurancePremiumRate: '',
+        technicalInterestRate: '',
         insuranceLoading: '',
         reservePeriodYears: '',
         reservePeriodMonths: '',
@@ -133,7 +133,7 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
         let requestData = {
             insuranceType: input.insuranceType,
             insurancePremiumFrequency: input.insurancePremiumFrequency,
-            insurancePremiumRate: input.insurancePremiumRate / 100,
+            technicalInterestRate: input.technicalInterestRate / 100,
         };
 
         if (input.insuranceType !== "cumulative insurance") {
@@ -186,9 +186,9 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
                         handleInput={handleInput}
                     />
                     <CalculatorPaymentFieldGroup
-                        insurancePremiumRate={input.insurancePremiumRate}
+                        technicalInterestRate={input.technicalInterestRate}
                         insuranceLoading={input.insuranceLoading}
-                        insurancePremiumRateErrors={errors.insurancePremiumRate}
+                        technicalInterestRateErrors={errors.technicalInterestRate}
                         insuranceLoadingErrors={errors.insuranceLoading}
                         insuranceType={input.insuranceType}
                         handleInput={handleInput}
