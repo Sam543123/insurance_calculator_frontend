@@ -31,7 +31,7 @@ form {
   margin-bottom: 15px;
 }
 
-form input,
+form input:not([type="radio"]),
 form select { 
   font-size: 14px;
   height: 35px;
