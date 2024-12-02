@@ -120,7 +120,7 @@ function SumCalculator({ savedInput, savedErrors, savedResult, setInput, setErro
                         handleInput={handleInput}
                     />
                     <CalculatorField labelText="Enter insurance premium:">
-                        <input type="text" inputMode="numeric" pattern={inputFloatPattern} name="insurancePremium" value={input.insurancePremium} onChange={handleInput} />
+                        <input type="text" inputMode="decimal" pattern={inputFloatPattern} name="insurancePremium" value={input.insurancePremium} onChange={handleInput} />
                         <CalculatorFieldErrorGroup errors={errors.insurancePremium} insuranceType={input.insuranceType} />
                     </CalculatorField>
                     <CalculationButton isButtonActive={isButtonActive} />

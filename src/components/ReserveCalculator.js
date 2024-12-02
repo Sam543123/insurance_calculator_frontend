@@ -208,7 +208,7 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
                         </div>
                         <input
                             type="text"
-                            inputMode="numeric"
+                            inputMode="decimal"
                             pattern={inputFloatPattern}
                             name="insurancePremium"
                             value={input.insurancePremium}
@@ -230,7 +230,7 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
                         </div>
                         <input
                             type="text"
-                            inputMode="numeric"
+                            inputMode="decimal"
                             pattern={inputFloatPattern}
                             name="insuranceSum"
                             value={input.insuranceSum}

@@ -8,12 +8,12 @@ function CalculatorPaymentFieldGroup({ insuranceLoading, technicalInterestRate, 
     return (
         <React.Fragment>
             <CalculatorField labelText="Enter technical interest rate:">
-                <input type="text" inputMode="numeric" pattern={inputFloatPattern} name="technicalInterestRate" value={technicalInterestRate} onChange={handleInput} />
+                <input type="text" inputMode="decimal" pattern={inputFloatPattern} name="technicalInterestRate" value={technicalInterestRate} onChange={handleInput} />
                 <CalculatorFieldErrorGroup errors={technicalInterestRateErrors} insuranceType={insuranceType} />
             </CalculatorField>
             {addInsuranceLoadingField === true && (
                 <CalculatorField labelText="Enter insurance loading in %:">
-                    <input type="text" inputMode="numeric" pattern={inputFloatPattern} name="insuranceLoading" value={insuranceLoading} onChange={handleInput} />
+                    <input type="text" inputMode="decimal" pattern={inputFloatPattern} name="insuranceLoading" value={insuranceLoading} onChange={handleInput} />
                     <CalculatorFieldErrorGroup errors={insuranceLoadingErrors} insuranceType={insuranceType} />
                 </CalculatorField>
             )}

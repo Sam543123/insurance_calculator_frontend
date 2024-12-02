@@ -117,7 +117,7 @@ function PremiumCalculator({ savedInput, savedErrors, savedResult, setInput, set
                         handleInput={handleInput}
                     />
                     <CalculatorField labelText="Enter insurance sum:">
-                        <input type="text" inputMode="numeric" pattern={inputFloatPattern} name="insuranceSum" value={input.insuranceSum} onChange={handleInput} />
+                        <input type="text" inputMode="decimal" pattern={inputFloatPattern} name="insuranceSum" value={input.insuranceSum} onChange={handleInput} />
                         <CalculatorFieldErrorGroup errors={errors.insuranceSum} insuranceType={input.insuranceType} />
                     </CalculatorField>
                     <CalculationButton isButtonActive={isButtonActive} />
