@@ -42,7 +42,7 @@ function App() {
         {/* render drop down list of target values */}
         <Select
           options={targets}
-          selected={target}
+          value={target}
           onChange={handleChooseTarget}
           className="calculator-dropdown"
         />

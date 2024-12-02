@@ -13,7 +13,7 @@ function CalculatorTraitFieldGroup({ insuranceType, insurancePremiumFrequency, g
             <CalculatorField labelText="Choose insurance type:">
                 <Select
                     options={insuranceTypes}
-                    selected={insuranceType}
+                    value={insuranceType}
                     onChange={handleInput}
                     name="insuranceType"
                 />
@@ -21,7 +21,7 @@ function CalculatorTraitFieldGroup({ insuranceType, insurancePremiumFrequency, g
             <CalculatorField labelText="Choose insurance premium payment frequency:">
                 <Select
                     options={insurancePremiumFrequencyChoices}
-                    selected={insurancePremiumFrequency}
+                    value={insurancePremiumFrequency}
                     onChange={handleInput}
                     name="insurancePremiumFrequency"
                 />
@@ -30,7 +30,7 @@ function CalculatorTraitFieldGroup({ insuranceType, insurancePremiumFrequency, g
                 < CalculatorField labelText="Choose gender of insured person:">
                     <Select
                         options={genders}
-                        selected={gender}
+                        value={gender}
                         onChange={handleInput}
                         name="gender"
                     />
