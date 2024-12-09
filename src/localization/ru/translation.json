@@ -45,5 +45,8 @@
     "Maximum insurance period must be greater than 0.": "Максимальный период страхования должен быть больше 0.",
     "Maximum age of insurance start can't be greater than 100.": "Максимальный возраст начала страхования не может быть больше 100.",
     "Sum of maximum insurance age and maximum insurance period can't be greater than 101 year.": "Сумма максимального возраста страхования и максимального периода страхования не может быть больше 101.",
-    "Minimum age of insurance start can't be greater than maximum age of insurance start.": "Минимальный возраст начала страхования не может быть больше максимального возраста начала страхования."
+    "Minimum age of insurance start can't be greater than maximum age of insurance start.": "Минимальный возраст начала страхования не может быть больше максимального возраста начала страхования.",
+    "Enter correct birth date in dd.mm.yyyy format.": "Введите корректную дату рождения в формате дд.мм.гггг.",
+    "Enter correct insurance start date in dd.mm.yyyy format.": "Введите корректную дату начала страхования в формате дд.мм.гггг.",
+    "dd.mm.yyyy": "дд.мм.гггг"
 }

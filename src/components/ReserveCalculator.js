@@ -6,11 +6,12 @@ import PeriodFieldGroup from "./PeriodFieldGroup.js";
 import CalculatorFieldErrorGroup from "./CalculatorFieldErrorGroup.js";
 import CalculatorResult from "./CalculatorResult.js";
 import CalculationButton from "./CalculationButton.js";
-import { inputFloatPattern, REACT_APP_API_URL } from "../utils.js";
+import { dateFormat, inputFloatPattern, REACT_APP_API_URL, requestDateFormat } from "../utils.js";
 import { getBaseErrors, getCommonErrors, getCommonExcludedFields, removeError, findPreviousCommonError, commonHandleInput } from "../utils.js";
 import { useToggleButton } from "../hooks.js";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
+import moment from "moment";
 
 
 function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, setErrors, setResult }) {
@@ -137,8 +138,8 @@ function ReserveCalculator({ savedInput, savedErrors, savedResult, setInput, set
         };
 
         if (input.insuranceType !== "cumulative insurance") {
-            requestData.birthDate = input.birthDate;
-            requestData.insuranceStartDate = input.insuranceStartDate;
+            requestData.birthDate = moment(input.birthDate, dateFormat).format(requestDateFormat);
+            requestData.insuranceStartDate =  moment(input.insuranceStartDate, dateFormat).format(requestDateFormat);
             requestData.gender = input.gender;
         }
 

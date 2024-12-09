@@ -6,10 +6,11 @@ import CalculatorPaymentFieldGroup from "./CalculatorPaymentFieldGroup.js";
 import CalculatorFieldErrorGroup from "./CalculatorFieldErrorGroup.js";
 import CalculatorResult from "./CalculatorResult.js";
 import CalculationButton from "./CalculationButton.js";
-import { getBaseErrors, getCommonErrors, getCommonExcludedFields, commonHandleInput } from "../utils.js";
+import { getBaseErrors, getCommonErrors, getCommonExcludedFields, commonHandleInput, dateFormat, requestDateFormat } from "../utils.js";
 import { useToggleButton } from "../hooks.js";
 import { inputFloatPattern, REACT_APP_API_URL } from "../utils.js";
 import axios from "axios";
+import moment from "moment";
 
 
 function SumCalculator({ savedInput, savedErrors, savedResult, setInput, setErrors, setResult }) {
@@ -71,8 +72,8 @@ function SumCalculator({ savedInput, savedErrors, savedResult, setInput, setErro
         };
 
         if (input.insuranceType !== "cumulative insurance") {
-            requestData.birthDate = input.birthDate;
-            requestData.insuranceStartDate = input.insuranceStartDate;
+            requestData.birthDate = moment(input.birthDate, dateFormat).format(requestDateFormat);
+            requestData.insuranceStartDate =  moment(input.insuranceStartDate, dateFormat).format(requestDateFormat);
             requestData.gender = input.gender;
         }
 
