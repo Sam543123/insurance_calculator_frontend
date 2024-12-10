@@ -5,7 +5,7 @@ function CalculatorResult({ label, result }) {
   const { t } = useTranslation();
   return (
     <div className="calculator-result">       
-        <p>{t(label)}={result || "?"}</p>       
+        <p>{t(label, {context: "result"})}={result || "?"}</p>       
     </div>
   );
 }
