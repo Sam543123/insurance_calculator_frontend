@@ -3,6 +3,7 @@ import CalculatorField from "./CalculatorField.js";
 import PeriodFieldGroup from "./PeriodFieldGroup.js";
 import CalculatorFieldErrorGroup from "./CalculatorFieldErrorGroup.js";
 import { useTranslation } from "react-i18next";
+import InputMask from "@mona-health/react-input-mask";
 
 function CalculatorTimeFieldGroup(props) {
     const { t } = useTranslation();
@@ -12,11 +13,11 @@ function CalculatorTimeFieldGroup(props) {
             {props.insuranceType !== "cumulative insurance" && (
                 <React.Fragment>
                     <CalculatorField labelText="Enter birth date of insured person:">
-                        <input name="birthDate" value={props.birthDate} onChange={props.handleInput} placeholder={t("dd.mm.yyyy")} />
+                        <InputMask name="birthDate" value={props.birthDate} onChange={props.handleInput} mask="99.99.9999" placeholder={t("dd.mm.yyyy")} />
                         <CalculatorFieldErrorGroup errors={props.birthDateErrors} insuranceType={props.insuranceType} />
                     </CalculatorField>
                     <CalculatorField labelText="Enter start date of insurance:">
-                        <input name="insuranceStartDate" value={props.insuranceStartDate} onChange={props.handleInput} placeholder={t("dd.mm.yyyy")} />
+                        <InputMask name="insuranceStartDate" value={props.insuranceStartDate} onChange={props.handleInput} mask="99.99.9999" placeholder={t("dd.mm.yyyy")} />
                         <CalculatorFieldErrorGroup errors={props.insuranceStartDateErrors} insuranceType={props.insuranceType} />
                     </CalculatorField>
                 </React.Fragment>
