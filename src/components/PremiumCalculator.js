@@ -6,25 +6,24 @@ import CalculatorPaymentFieldGroup from "./CalculatorPaymentFieldGroup.js";
 import CalculatorFieldErrorGroup from "./CalculatorFieldErrorGroup.js";
 import CalculatorResult from "./CalculatorResult.js";
 import CalculationButton from "./CalculationButton.js";
-import { getBaseErrors, getCommonErrors, getCommonExcludedFields, commonHandleInput, dateFormat, requestDateFormat } from "../utils.js";
+import { getCommonErrors, getCommonExcludedFields, commonHandleInput, getCommonRequestData, calculate } from "../utils.js";
 import { useToggleButton } from "../hooks.js";
 import { inputFloatPattern, REACT_APP_API_URL } from "../utils.js";
-import axios from "axios";
-import moment from "moment";
+
 
 function PremiumCalculator({ savedInput, savedErrors, savedResult, setInput, setErrors, setResult }) {
     // Get saved input from props or default input
     const input = savedInput || {
-        insuranceType: 'pure endowment',
-        insurancePremiumFrequency: 'simultaneously',
-        gender: 'male',
-        birthDate: '',
-        insuranceStartDate: '',
-        insurancePeriodYears: '',
-        insurancePeriodMonths: '',
-        technicalInterestRate: '',
-        insuranceLoading: '',
-        insuranceSum: ''
+        insuranceType: "pure endowment",
+        insurancePremiumFrequency: "simultaneously",
+        gender: "male",
+        birthDate: "",
+        insuranceStartDate: "",
+        insurancePeriodYears: "",
+        insurancePeriodMonths: "",
+        technicalInterestRate: "",
+        insuranceLoading: "",
+        insuranceSum: ""
     }
     // Get saved errors from props or empty error dictionary
     const errors = savedErrors || Object.keys(input).reduce((acc, field) => {
@@ -38,53 +37,32 @@ function PremiumCalculator({ savedInput, savedErrors, savedResult, setInput, set
     const isButtonActive = useToggleButton(input, errors, getCommonExcludedFields);
 
     // validate calculator input
-    const validate = (fieldName, updatedInput) => {
-        let newErrors = { ...errors, [fieldName]: { fieldErrors: [], personalFieldErrors: false } };
-        newErrors = getBaseErrors(fieldName, updatedInput, newErrors);
-        newErrors = getCommonErrors(fieldName, updatedInput, newErrors);
+    const validate = (fieldName, updatedInput, currentErrors) => {
+        let updatedErrors = getCommonErrors(fieldName, updatedInput, currentErrors);
 
         if (fieldName === "insuranceSum") {
             if (updatedInput.insuranceSum !== "" && Number(updatedInput.insuranceSum) <= 0) {
-                newErrors[fieldName].fieldErrors.push({ message: "Insurance sum must be greater than 0.", excludedInsuranceTypes: [] });
-                newErrors[fieldName].personalFieldErrors = true;
+                updatedErrors[fieldName].fieldErrors.push({ message: "Insurance sum must be greater than 0.", excludedInsuranceTypes: [] });
+                updatedErrors[fieldName].personalFieldErrors = true;
             }
         }
-        return newErrors;
+        return updatedErrors;
     }
 
     // Update calculator form when user enters data
-    const handleInput = (e) => {
-        commonHandleInput(e, input, validate, setInput, setErrors);
+    const handleInput = (event) => {
+        commonHandleInput(event, input, errors, setInput, setErrors, validate);
     };
 
     // Calculate insurance premium when "Calculate" button is pressed
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        const routeURL = `${REACT_APP_API_URL}insurance_premium/`;
-        let requestData = {
-            insuranceType: input.insuranceType,
-            insurancePremiumFrequency: input.insurancePremiumFrequency,
-            technicalInterestRate: input.technicalInterestRate / 100,
-            insuranceLoading: input.insuranceLoading / 100,
-            insuranceSum: input.insuranceSum
-        };
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        const routeURL = `${REACT_APP_API_URL}insurance-premium/`;
+        let requestData = getCommonRequestData(input);
+        requestData.insuranceLoading = input.insuranceLoading / 100;
+        requestData.insuranceSum = input.insuranceSum;
 
-        if (input.insuranceType !== "cumulative insurance") {
-            requestData.birthDate = moment(input.birthDate, dateFormat).format(requestDateFormat);
-            requestData.insuranceStartDate =  moment(input.insuranceStartDate, dateFormat).format(requestDateFormat);
-            requestData.gender = input.gender;
-        }
-
-        if (input.insuranceType !== "whole life insurance") {
-            requestData.insurancePeriod = 12 * Number(input.insurancePeriodYears) + Number(input.insurancePeriodMonths);
-        }
-
-        try {
-            const response = await axios.post(routeURL, requestData);
-            setResult(response.data.result)
-        } catch (error) {
-            console.error(`Error while sending request to ${routeURL}`, error);
-        }
+        await calculate(requestData, setResult, routeURL);
     }
 
     return (

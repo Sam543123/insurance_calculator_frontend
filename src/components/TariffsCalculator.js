@@ -5,7 +5,7 @@ import CalculatorPaymentFieldGroup from "./CalculatorPaymentFieldGroup.js";
 import PeriodFieldGroup from "./PeriodFieldGroup.js";
 import CalculatorFieldErrorGroup from "./CalculatorFieldErrorGroup.js";
 import CalculationButton from "./CalculationButton.js";
-import { inputIntegerPattern, REACT_APP_API_URL } from "../utils.js";
+import { getBaseRequestData, inputIntegerPattern, REACT_APP_API_URL } from "../utils.js";
 import { getBaseErrors, removeError, findPreviousCommonError, commonHandleInput } from "../utils.js";
 import { useToggleButton } from "../hooks.js";
 import axios from "axios";
@@ -17,16 +17,16 @@ function TariffsCalculator({ savedInput, savedErrors, setInput, setErrors }) {
     const { i18n } = useTranslation();
     // Get saved input from props or default input
     const input = savedInput || {
-        insuranceType: 'pure endowment',
-        insurancePremiumFrequency: 'simultaneously',
-        gender: 'male',
-        technicalInterestRate: '',
-        insuranceLoading: '',
-        minimumInsuranceStartAge: '',
-        maximumInsuranceStartAge: '',
-        maximumInsurancePeriod: '',
-        maximumInsurancePeriodYears: '',
-        maximumInsurancePeriodMonths: '',
+        insuranceType: "pure endowment",
+        insurancePremiumFrequency: "simultaneously",
+        gender: "male",
+        technicalInterestRate: "",
+        insuranceLoading: "",
+        minimumInsuranceStartAge: "",
+        maximumInsuranceStartAge: "",
+        maximumInsurancePeriod: "",
+        maximumInsurancePeriodYears: "",
+        maximumInsurancePeriodMonths: "",
     }
     // Get saved errors from props or empty error dictionary
     const errors = savedErrors || Object.keys(input).reduce((acc, field) => {
@@ -35,53 +35,52 @@ function TariffsCalculator({ savedInput, savedErrors, setInput, setErrors }) {
     }, {})
 
 
-    const getExcludedFields = React.useCallback(() => {
+    const getExcludedFields = React.useCallback((inputData) => {
         let excludedFields = [];
-        if (input.insuranceType !== "cumulative insurance") {
+        if (inputData.insuranceType !== "cumulative insurance") {
             excludedFields.push("maximumInsurancePeriodMonths", "maximumInsurancePeriodYears");
-            if (input.insuranceType === "whole life insurance") {
+            if (inputData.insuranceType === "whole life insurance") {
                 excludedFields.push("maximumInsurancePeriod");
             }
         } else {
             excludedFields.push("maximumInsurancePeriod", "minimumInsuranceStartAge", "maximumInsuranceStartAge");
         }
         return excludedFields
-    }, [input])
+    }, [])
     // State variable that indicates if "Calculate" button is active
     // "Calculate" button is active if all fields are filled and there are no input errors
     const isButtonActive = useToggleButton(input, errors, getExcludedFields);
 
     // validate calculator input
-    const validate = (fieldName, updatedInput) => {
-        let newErrors = { ...errors, [fieldName]: { fieldErrors: [], personalFieldErrors: false } };
+    const validate = (fieldName, updatedInput, currentErrors) => {      
         let fieldsToValidate;
         let commonErrorMessage;
         let personalFieldInputCorrect;
         let previousCommonErrorField;
-        newErrors = getBaseErrors(fieldName, updatedInput, newErrors);
+        let updatedErrors = getBaseErrors(fieldName, updatedInput, currentErrors);
 
         fieldsToValidate = ["maximumInsurancePeriodYears", "maximumInsurancePeriodMonths"];
         if (fieldsToValidate.includes(fieldName)) {
             if (fieldName === "maximumInsurancePeriodMonths") {
                 if (updatedInput.maximumInsurancePeriodMonths !== "" && Number(updatedInput.maximumInsurancePeriodMonths) > 11) {
-                    newErrors[fieldName].fieldErrors.push({ message: "Number of months in maximum insurance period must be less than 12.", excludedInsuranceTypes: ["pure endowment", "term life insurance", "whole life insurance"] });
-                    newErrors[fieldName].personalFieldErrors = true;
+                    updatedErrors[fieldName].fieldErrors.push({ message: "Number of months in maximum insurance period must be less than 12.", excludedInsuranceTypes: ["pure endowment", "term life insurance", "whole life insurance"] });
+                    updatedErrors[fieldName].personalFieldErrors = true;
                 }
             }
 
             commonErrorMessage = "Maximum insurance period must be greater than 0.";
-            previousCommonErrorField = findPreviousCommonError(fieldsToValidate, newErrors, commonErrorMessage);
-            personalFieldInputCorrect = fieldsToValidate.every((f) => newErrors[f].personalFieldErrors === false && updatedInput[f] !== "");
+            previousCommonErrorField = findPreviousCommonError(fieldsToValidate, updatedErrors, commonErrorMessage);
+            personalFieldInputCorrect = fieldsToValidate.every((f) => updatedErrors[f].personalFieldErrors === false && updatedInput[f] !== "");
             if (personalFieldInputCorrect) {
                 if (Number(updatedInput.maximumInsurancePeriodYears) === 0 && Number(updatedInput.maximumInsurancePeriodMonths) === 0) {
                     if (previousCommonErrorField === null) {
-                        newErrors[fieldName].fieldErrors.push({ message: commonErrorMessage, excludedInsuranceTypes: [] });
+                        updatedErrors[fieldName].fieldErrors.push({ message: commonErrorMessage, excludedInsuranceTypes: [] });
                     }
                 } else {
-                    removeError(previousCommonErrorField, newErrors, commonErrorMessage);
+                    removeError(previousCommonErrorField, updatedErrors, commonErrorMessage);
                 }
             } else {
-                removeError(previousCommonErrorField, newErrors, commonErrorMessage);
+                removeError(previousCommonErrorField, updatedErrors, commonErrorMessage);
             }
         }
 
@@ -89,67 +88,63 @@ function TariffsCalculator({ savedInput, savedErrors, setInput, setErrors }) {
         if (fieldsToValidate.includes(fieldName)) {
             if (fieldName === "maximumInsurancePeriod") {
                 if (updatedInput.maximumInsurancePeriod !== "" && Number(updatedInput.maximumInsurancePeriod) <= 0) {
-                    newErrors[fieldName].fieldErrors.push({ message: "Maximum insurance period must be greater than 0.", excludedInsuranceTypes: ["whole life insurance"] });
-                    newErrors[fieldName].personalFieldErrors = true;
+                    updatedErrors[fieldName].fieldErrors.push({ message: "Maximum insurance period must be greater than 0.", excludedInsuranceTypes: ["whole life insurance"] });
+                    updatedErrors[fieldName].personalFieldErrors = true;
                 }
             } else if (fieldName === "maximumInsuranceStartAge") {
                 if (updatedInput.maximumInsuranceStartAge !== "" && Number(updatedInput.maximumInsuranceStartAge) > 100) {
-                    newErrors[fieldName].fieldErrors.push({ message: "Maximum age of insurance start can't be greater than 100.", excludedInsuranceTypes: ["cumulative insurance"] });
-                    newErrors[fieldName].personalFieldErrors = true;
+                    updatedErrors[fieldName].fieldErrors.push({ message: "Maximum age of insurance start can't be greater than 100.", excludedInsuranceTypes: ["cumulative insurance"] });
+                    updatedErrors[fieldName].personalFieldErrors = true;
                 }
             }
             commonErrorMessage = "Sum of maximum insurance age and maximum insurance period can't be greater than 101 year.";
-            previousCommonErrorField = findPreviousCommonError(fieldsToValidate, newErrors, commonErrorMessage);
-            personalFieldInputCorrect = fieldsToValidate.every((f) => newErrors[f].personalFieldErrors === false && updatedInput[f] !== "");
+            previousCommonErrorField = findPreviousCommonError(fieldsToValidate, updatedErrors, commonErrorMessage);
+            personalFieldInputCorrect = fieldsToValidate.every((f) => updatedErrors[f].personalFieldErrors === false && updatedInput[f] !== "");
             if (personalFieldInputCorrect) {
                 if (Number(updatedInput.maximumInsurancePeriod) + Number(updatedInput.maximumInsuranceStartAge) > 101) {
                     if (previousCommonErrorField === null) {
-                        newErrors[fieldName].fieldErrors.push({ message: commonErrorMessage, excludedInsuranceTypes: ["cumulative insurance", "whole life insurance"] });
+                        updatedErrors[fieldName].fieldErrors.push({ message: commonErrorMessage, excludedInsuranceTypes: ["cumulative insurance", "whole life insurance"] });
                     }
                 } else {
-                    removeError(previousCommonErrorField, newErrors, commonErrorMessage);
+                    removeError(previousCommonErrorField, updatedErrors, commonErrorMessage);
                 }
             } else {
-                removeError(previousCommonErrorField, newErrors, commonErrorMessage);
+                removeError(previousCommonErrorField, updatedErrors, commonErrorMessage);
             }
         }
 
         fieldsToValidate = ["minimumInsuranceStartAge", "maximumInsuranceStartAge"];
         if (fieldsToValidate.includes(fieldName)) {
             commonErrorMessage = "Minimum age of insurance start can't be greater than maximum age of insurance start.";
-            previousCommonErrorField = findPreviousCommonError(fieldsToValidate, newErrors, commonErrorMessage);
-            personalFieldInputCorrect = fieldsToValidate.every((f) => newErrors[f].personalFieldErrors === false && updatedInput[f] !== "");
+            previousCommonErrorField = findPreviousCommonError(fieldsToValidate, updatedErrors, commonErrorMessage);
+            personalFieldInputCorrect = fieldsToValidate.every((f) => updatedErrors[f].personalFieldErrors === false && updatedInput[f] !== "");
             if (personalFieldInputCorrect) {
                 if (Number(updatedInput.minimumInsuranceStartAge) > Number(updatedInput.maximumInsuranceStartAge)) {
                     if (previousCommonErrorField === null) {
-                        newErrors[fieldName].fieldErrors.push({ message: commonErrorMessage, excludedInsuranceTypes: ["cumulative insurance"] });
+                        updatedErrors[fieldName].fieldErrors.push({ message: commonErrorMessage, excludedInsuranceTypes: ["cumulative insurance"] });
                     }
                 } else {
-                    removeError(previousCommonErrorField, newErrors, commonErrorMessage);
+                    removeError(previousCommonErrorField, updatedErrors, commonErrorMessage);
                 }
             } else {
-                removeError(previousCommonErrorField, newErrors, commonErrorMessage);
+                removeError(previousCommonErrorField, updatedErrors, commonErrorMessage);
             }
         }
-        return newErrors;
+        return updatedErrors;
     }
 
     // Update calculator form when user enters data
-    const handleInput = (e) => {
-        commonHandleInput(e, input, validate, setInput, setErrors);
+    const handleInput = (event) => {
+        commonHandleInput(event, input, errors, setInput, setErrors, validate);
     };
 
     // Build tariffs table when "Calculate" button is pressed
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleSubmit = async (event) => {
+        event.preventDefault();
         const routeURL = `${REACT_APP_API_URL}tariffs/`;
-        let requestData = {
-            insuranceType: input.insuranceType,
-            insurancePremiumFrequency: input.insurancePremiumFrequency,
-            technicalInterestRate: input.technicalInterestRate / 100,
-            insuranceLoading: input.insuranceLoading / 100,
-            responseLanguageCode: i18n.language
-        };
+        let requestData = getBaseRequestData(input);
+        requestData.insuranceLoading = input.insuranceLoading / 100;
+        requestData.responseLanguageCode = i18n.language;
 
         if (input.insuranceType !== "cumulative insurance") {
             requestData.minimumInsuranceStartAge = input.minimumInsuranceStartAge;

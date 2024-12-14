@@ -32,16 +32,20 @@ form {
 }
 
 form input:not([type="radio"]),
-form select { 
+form select {
   font-size: 14px;
   height: 35px;
-  box-sizing: border-box; 
+  box-sizing: border-box;
   padding: 8px;
   margin-top: 5px;
   border: 1px solid #ccc;
   border-radius: 5px;
-  background-color: white;
   color: black
+}
+
+form input:not(:disabled),
+form select {
+  background-color: white;
 }
 
 form p {
@@ -127,6 +131,7 @@ form p {
 .disabled {
   background-color: #ccc;
   color: #666;
+  cursor: default;
 }
 
 .calculator-result {
@@ -162,17 +167,18 @@ form p {
   align-items: center
 }
 
-.language-switch-button * {  
+.language-switch-button * {
   padding: 0px;
   margin: 0px;
 }
 
 
-@media (max-width: 600px) { 
+@media (max-width: 600px) {
   .period-field-input {
     padding: 10px;
   }
-  .calculation-button {    
-    width: 120px;   
+
+  .calculation-button {
+    width: 120px;
   }
 }

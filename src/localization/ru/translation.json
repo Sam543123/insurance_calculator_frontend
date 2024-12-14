@@ -48,6 +48,6 @@
     "Number of months in maximum insurance period must be less than 12.": "Количество месяцев в максимальном периоде страхования должно быть меньше 12.",
     "Maximum insurance period must be greater than 0.": "Максимальный период страхования должен быть больше 0.",
     "Maximum age of insurance start can't be greater than 100.": "Максимальный возраст начала страхования не может быть больше 100.",
-    "Sum of maximum insurance age and maximum insurance period can't be greater than 101 year.": "Сумма максимального возраста страхования и максимального периода страхования не может быть больше 101.",
+    "Sum of maximum insurance age and maximum insurance period can't be greater than 101 year.": "Сумма максимального возраста страхования и максимального периода страхования не может быть больше 101 года.",
     "Minimum age of insurance start can't be greater than maximum age of insurance start.": "Минимальный возраст начала страхования не может быть больше максимального возраста начала страхования."
 }

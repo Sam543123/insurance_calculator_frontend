@@ -5,7 +5,7 @@ import CalculatorFieldErrorGroup from "./CalculatorFieldErrorGroup.js";
 import { useTranslation } from "react-i18next";
 
 function PeriodFieldGroup(props) {
-    // Render group of years and months fields with label
+    // Render group of fields for entering period in years and months with label
     const { t } = useTranslation()
     return (
         <CalculatorField labelText={props.labelText}>
